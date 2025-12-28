@@ -1,5 +1,8 @@
 jQuery( function( $ ) {
     'use strict';
+    
+    console.log('woopro-front.js loaded');
+    console.log('jQuery version:', $.fn.jquery);
 
     ;( function ( document, window, index ) {
         // feature detection for drag&drop upload
@@ -17,7 +20,39 @@ jQuery( function( $ ) {
                 restart      = form.querySelectorAll( '.box__restart' ),
                 droppedFiles = false,
                 showFiles    = function( files ) {
-                    label.textContent = files.length > 1 ? ( input.getAttribute( 'data-multiple-caption' ) || '' ).replace( '{count}', files.length ) : files[ 0 ].name;
+                    // Show filename
+                    var filenameDiv = form.querySelector('.box__filename');
+                    if( filenameDiv ) {
+                        var filename = files.length > 1 ? ( input.getAttribute( 'data-multiple-caption' ) || '' ).replace( '{count}', files.length ) : files[ 0 ].name;
+                        filenameDiv.textContent = 'Selected: ' + filename;
+                        filenameDiv.style.marginTop = '15px';
+                        filenameDiv.style.fontSize = '14px';
+                        filenameDiv.style.color = '#333';
+                        filenameDiv.style.fontWeight = 'bold';
+                    }
+                    
+                    // Show image preview
+                    var previewDiv = form.querySelector('.box__image-preview');
+                    if( files.length > 0 && files[0].type.match('image.*') && previewDiv ) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var existingPreview = previewDiv.querySelector('img');
+                            if( existingPreview ) {
+                                existingPreview.src = e.target.result;
+                            } else {
+                                var preview = document.createElement('img');
+                                preview.src = e.target.result;
+                                preview.style.maxWidth = '250px';
+                                preview.style.marginTop = '10px';
+                                preview.style.display = 'block';
+                                preview.style.border = '2px solid #ddd';
+                                preview.style.borderRadius = '5px';
+                                preview.style.padding = '5px';
+                                previewDiv.appendChild(preview);
+                            }
+                        };
+                        reader.readAsDataURL(files[0]);
+                    }
                 },
                 triggerFormSubmit = function() {
                     var event = document.createEvent( 'HTMLEvents' );
@@ -34,7 +69,44 @@ jQuery( function( $ ) {
 
             // automatically submit the form on file select
             input.addEventListener( 'change', function( e ) {
-                showFiles( e.target.files );                
+                console.log('File selected:', e.target.files);
+                showFiles( e.target.files );
+                
+                // Also update the preview directly
+                if( e.target.files.length > 0 ) {
+                    var file = e.target.files[0];
+                    
+                    // Update filename
+                    var filenameDiv = document.querySelector('.box__filename');
+                    if( filenameDiv ) {
+                        filenameDiv.textContent = 'Selected: ' + file.name;
+                        filenameDiv.style.marginTop = '15px';
+                        filenameDiv.style.fontSize = '14px';
+                        filenameDiv.style.color = '#333';
+                        filenameDiv.style.fontWeight = 'bold';
+                    }
+                    
+                    // Update image preview
+                    if( file.type.match('image.*') ) {
+                        var reader = new FileReader();
+                        reader.onload = function(event) {
+                            var previewDiv = document.querySelector('.box__image-preview');
+                            if( previewDiv ) {
+                                previewDiv.innerHTML = '';
+                                var img = document.createElement('img');
+                                img.src = event.target.result;
+                                img.style.maxWidth = '250px';
+                                img.style.marginTop = '10px';
+                                img.style.display = 'block';
+                                img.style.border = '2px solid #ddd';
+                                img.style.borderRadius = '5px';
+                                img.style.padding = '5px';
+                                previewDiv.appendChild(img);
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
             });
 
             // drag&drop files if the feature is available
@@ -214,10 +286,70 @@ jQuery( function( $ ) {
 
     $( 'body' ).on( 'click', '.yape_peru', function(e) {
         e.preventDefault();
+        
+        // Get selected payment option from checkout
+        var selectedIndex = $( 'input[name="kwp_selected_qr_option"]:checked' ).val();
+        if( typeof selectedIndex === 'undefined' ) {
+            selectedIndex = 0; // Default to first option
+        }
+        
+        // Load data from the corresponding hidden div
+        var $selectedOption = $( '.kwp-qr-data-item[data-index="' + selectedIndex + '"]' );
+        
+        if( $selectedOption.length ) {
+            var qrImage = $selectedOption.data( 'qr-image' );
+            var phone = $selectedOption.data( 'phone' );
+            var limit = $selectedOption.data( 'limit' );
+            var limitMessage = $selectedOption.data( 'limit-message' );
+            var optionName = $selectedOption.data( 'option-name' );
+            var popupDescription = $selectedOption.data( 'popup-description' );
+            
+            // Update QR image
+            $( '.popup-qr' ).attr( 'src', qrImage );
+            
+            // Update popup description
+            if( popupDescription ) {
+                if( $( '.kwp-qr-display p.popup-description' ).length ) {
+                    $( '.kwp-qr-display p.popup-description' ).text( popupDescription );
+                } else {
+                    $( '.kwp-qr-display .message-limit-amount' ).after( '<p class="popup-description">' + popupDescription + '</p>' );
+                }
+            } else {
+                $( '.kwp-qr-display p.popup-description' ).remove();
+            }
+            
+            // Update phone number
+            if( phone ) {
+                if( $( '.telephone-number' ).length ) {
+                    $( '.telephone-number a' ).attr( 'href', 'tel:' + phone ).text( 'Add Contact: ' + phone );
+                    $( '.telephone-number' ).show();
+                } else {
+                    $( '.popup-qr' ).after( '<span class="telephone-number"><a href="tel:' + phone + '">Add Contact: ' + phone + '</a></span>' );
+                }
+            } else {
+                $( '.telephone-number' ).hide();
+            }
+            
+            // Update limit
+            $( '.popup-price-wrapper' ).data( 'price-limit', limit );
+            
+            // Update limit message
+            if( limitMessage ) {
+                if( $( '.message-limit-amount' ).length ) {
+                    $( '.message-limit-amount' ).text( limitMessage );
+                } else {
+                    $( '.price' ).after( '<p class="message-limit-amount" style="display: none;">' + limitMessage + '</p>' );
+                }
+            }
+            
+            // Update selected option input
+            $( '.selected-qr-option-input' ).val( optionName );
+        }
+        
         $( '.popup-wrapper' ).show();
         $( '.first-step .woocommerce-Price-amount' ).remove();
 
-        // Get price limit from first/selected option
+        // Get price limit from selected option
         var priceLimit = $( '.popup-price-wrapper' ).data( 'price-limit' );
         if( priceLimit ) {
             $( '.first-step .popup-price-wrapper' ).append( $( '.order-total .woocommerce-Price-amount' ).first().clone() );
@@ -238,6 +370,109 @@ jQuery( function( $ ) {
             $( '.first-step' ).append( '<button class="btn-continue btn_submit">'+kwp_translate.kwp_pqr_btn_continue+'</button>' );
         }
         $( '.first-step .price' ).append( $( '.order-total .woocommerce-Price-amount' ).first().clone() );
+    });
+
+    // Handle checkout QR option selection
+    $( 'body' ).on( 'click', '.kwp-checkout-qr-option', function() {
+        var $this = $( this );
+        
+        // Update active state
+        $( '.kwp-checkout-qr-option' ).removeClass( 'active' );
+        $this.addClass( 'active' );
+        
+        // Check the radio button
+        $this.find( 'input[type="radio"]' ).prop( 'checked', true ).trigger( 'change' );
+    });
+    
+    // Handle popup QR option selection
+    $( 'body' ).on( 'click', '.kwp-popup-option-item', function() {
+        var $this = $( this );
+        var selectedIndex = $this.data( 'index' );
+        
+        console.log('Popup option clicked, index:', selectedIndex);
+        
+        // Update active state
+        $( '.kwp-popup-option-item' ).removeClass( 'active' );
+        $this.addClass( 'active' );
+        
+        // Load data from the corresponding hidden div
+        var $selectedOption = $( '.kwp-qr-data-item[data-index="' + selectedIndex + '"]' );
+        
+        if( $selectedOption.length ) {
+            var qrImage = $selectedOption.data( 'qr-image' );
+            var phone = $selectedOption.data( 'phone' );
+            var limit = $selectedOption.data( 'limit' );
+            var limitMessage = $selectedOption.data( 'limit-message' );
+            var optionName = $selectedOption.data( 'option-name' );
+            var popupDescription = $selectedOption.data( 'popup-description' );
+            
+            console.log('Updating popup with:', optionName);
+            
+            // Update QR image
+            $( '.popup-qr' ).attr( 'src', qrImage );
+            
+            // Update popup description
+            if( popupDescription ) {
+                if( $( '.kwp-qr-display p.popup-description' ).length ) {
+                    $( '.kwp-qr-display p.popup-description' ).text( popupDescription );
+                } else {
+                    $( '.kwp-qr-display .message-limit-amount' ).after( '<p class="popup-description">' + popupDescription + '</p>' );
+                }
+            } else {
+                $( '.kwp-qr-display p.popup-description' ).remove();
+            }
+            
+            // Update phone number
+            if( phone ) {
+                if( $( '.telephone-number' ).length ) {
+                    $( '.telephone-number a' ).attr( 'href', 'tel:' + phone ).text( 'Add Contact: ' + phone );
+                    $( '.telephone-number' ).show();
+                } else {
+                    $( '.popup-qr' ).after( '<span class="telephone-number"><a href="tel:' + phone + '">Add Contact: ' + phone + '</a></span>' );
+                }
+            } else {
+                $( '.telephone-number' ).hide();
+            }
+            
+            // Update limit
+            $( '.popup-price-wrapper' ).data( 'price-limit', limit );
+            
+            // Update limit message
+            if( limitMessage ) {
+                if( $( '.message-limit-amount' ).length ) {
+                    $( '.message-limit-amount' ).text( limitMessage );
+                } else {
+                    $( '.price' ).after( '<p class="message-limit-amount" style="display: none;">' + limitMessage + '</p>' );
+                }
+            }
+            
+            // Update selected option input
+            $( '.selected-qr-option-input' ).val( optionName );
+            
+            // Re-check price limit
+            var priceLimit = limit;
+            if( priceLimit ) {
+                $( '.first-step .popup-price-wrapper' ).empty().append( $( '.order-total .woocommerce-Price-amount' ).first().clone() );
+                $( '.first-step .popup-price-wrapper .woocommerce-Price-currencySymbol' ).remove();
+                var getPrice = $( '.first-step .popup-price-wrapper' ).text();
+                if( getPrice ) {
+                    if( parseFloat( priceLimit ) < parseFloat( getPrice ) && parseFloat( priceLimit ) != parseFloat( getPrice ) ) {
+                        $( '.first-step .message-limit-amount' ).show();
+                        $( '.first-step .btn-continue' ).remove();
+                    } else {
+                        $( '.first-step .message-limit-amount' ).hide();
+                        if( !$( '.first-step .btn-continue' ).length ) {
+                            $( '.first-step' ).append( '<button class="btn-continue btn_submit">' + kwp_translate.kwp_pqr_btn_continue + '</button>' );
+                        }
+                    }
+                }
+            } else {
+                $( '.first-step .message-limit-amount' ).hide();
+                if( !$( '.first-step .btn-continue' ).length ) {
+                    $( '.first-step' ).append( '<button class="btn-continue btn_submit">' + kwp_translate.kwp_pqr_btn_continue + '</button>' );
+                }
+            }
+        }
     });
 
     // Handle QR option selection
@@ -322,9 +557,69 @@ jQuery( function( $ ) {
         $( '.first-step' ).hide();
     });
     
-    $( '.box__button' ).click(function(e){
+    // Use body delegation for dynamically loaded content
+    $( 'body' ).on('click', '.box__button', function(e){
         e.preventDefault();
+        console.log('Box button clicked (body delegation)');
         $( '.box__file' ).trigger( 'click' );
+    });
+    
+    // Handle file selection and show preview
+    $( document ).on( 'change', '.box__file', function(e) {
+        console.log('Change event triggered on .box__file');
+        var file = this.files[0];
+        console.log('File object:', file);
+        console.log('File name:', file ? file.name : 'No file');
+        console.log('.box__filename element:', $( '.box__filename' ).length);
+        console.log('.box__image-preview element:', $( '.box__image-preview' ).length);
+        
+        if( file ) {
+            // Update filename
+            var filenameDiv = $( '.box__filename' );
+            console.log('Setting filename to:', 'Selected: ' + file.name);
+            filenameDiv.text( 'Selected: ' + file.name ).css({
+                'margin-top': '15px',
+                'font-size': '14px',
+                'color': '#333',
+                'font-weight': 'bold',
+                'display': 'block'
+            });
+            console.log('Filename div text after set:', filenameDiv.text());
+            
+            // Update image preview
+            if( file.type.match('image.*') ) {
+                console.log('File is an image, creating preview');
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    console.log('FileReader loaded, creating img element');
+                    var img = $('<img>').attr('src', event.target.result).css({
+                        'max-width': '200px',
+                        'max-height': '200px',
+                        'width': 'auto',
+                        'height': 'auto',
+                        'margin': '10px auto',
+                        'display': 'block',
+                        'border': '2px solid #ddd',
+                        'border-radius': '5px',
+                        'padding': '5px',
+                        'object-fit': 'contain'
+                    });
+                    var previewDiv = $( '.box__image-preview' );
+                    previewDiv.html(img);
+                    console.log('Image added to preview div');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                console.log('File is not an image, type:', file.type);
+            }
+        } else {
+            console.log('No file selected');
+        }
+    });
+    
+    // Listen to WooCommerce checkout updates
+    $( document.body ).on( 'updated_checkout', function() {
+        console.log('WooCommerce checkout updated');
     });
 
 });

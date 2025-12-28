@@ -18,29 +18,54 @@
 			$options = get_option( 'woocommerce_wocommerce_yape_peru_settings' );
 			$qr_options = isset( $options['qr_options'] ) ? $options['qr_options'] : array();
 			
+			// Get color options
+			$bg_color = isset( $options['popup_bg_color'] ) ? $options['popup_bg_color'] : '#ffffff';
+			$text_color = isset( $options['popup_text_color'] ) ? $options['popup_text_color'] : '#000000';
+			$close_btn_color = isset( $options['popup_close_btn_color'] ) ? $options['popup_close_btn_color'] : '#000000';
+			$continue_btn_color = isset( $options['popup_continue_btn_color'] ) ? $options['popup_continue_btn_color'] : '#00bcd4';
+			
 			// If no QR options, don't show popup
 			if( empty( $qr_options ) ) {
 				return;
 			}
+			
+			// Get first option for default display
+			$first_option = reset( $qr_options );
 			?>
+			
+			<!-- Hidden data divs for JavaScript to read -->
+			<div class="kwp-qr-data-hidden" style="display: none;">
+				<?php foreach( $qr_options as $index => $qr_option ) : ?>
+					<div class="kwp-qr-data-item" 
+						data-index="<?php echo esc_attr( $index ); ?>"
+						data-option-name="<?php echo esc_attr( $qr_option['name'] ); ?>" 
+						data-qr-image="<?php echo esc_url( $qr_option['qr_image'] ); ?>" 
+					data-popup-description="<?php echo isset( $qr_option['popup_description'] ) ? esc_attr( $qr_option['popup_description'] ) : ''; ?>" 
+					data-phone="<?php echo isset( $qr_option['phone_number'] ) ? esc_attr( $qr_option['phone_number'] ) : ''; ?>" 
+					data-limit="<?php echo isset( $qr_option['limit_amount'] ) ? esc_attr( $qr_option['limit_amount'] ) : ''; ?>" 
+					data-limit-message="<?php echo isset( $qr_option['limit_message'] ) ? esc_attr( $qr_option['limit_message'] ) : ''; ?>">
+				</div>
+			<?php endforeach; ?>
+		</div>
+		
 			<div class="popup-wrapper">
 				<span class="helper"></span>
-				<div class="popup-main-wrapper">
-					<div class="popupCloseButton">&times;</div>
+				<div class="popup-main-wrapper" style="background-color: <?php echo esc_attr( $bg_color ); ?>; color: <?php echo esc_attr( $text_color ); ?>;">
+					<div class="popupCloseButton" style="color: <?php echo esc_attr( $close_btn_color ); ?>;">&times;</div>
 					<div class="first-step">
 						<?php if( count( $qr_options ) > 1 ) : ?>
-							<div class="kwp-qr-selector">
-								<h3><?php echo __( 'Select Payment Method', 'payment-qr-woo' ); ?></h3>
-								<div class="kwp-qr-options-list">
+							<div class="kwp-popup-qr-selector">
+								<h3 style="font-size: 18px; margin-bottom: 15px;"><?php echo __( 'Select Payment Method', 'payment-qr-woo' ); ?></h3>
+								<div class="kwp-popup-qr-options">
 									<?php foreach( $qr_options as $index => $qr_option ) : 
 										if( empty( $qr_option['qr_image'] ) ) continue;
 										$is_first = ( $index === array_key_first( $qr_options ) );
 									?>
-										<div class="kwp-qr-option-item <?php echo $is_first ? 'active' : ''; ?>" data-option-index="<?php echo esc_attr( $index ); ?>" data-option-name="<?php echo esc_attr( $qr_option['name'] ); ?>" data-qr-image="<?php echo esc_url( $qr_option['qr_image'] ); ?>" data-phone="<?php echo isset( $qr_option['phone_number'] ) ? esc_attr( $qr_option['phone_number'] ) : ''; ?>" data-limit="<?php echo isset( $qr_option['limit_amount'] ) ? esc_attr( $qr_option['limit_amount'] ) : ''; ?>" data-limit-message="<?php echo isset( $qr_option['limit_message'] ) ? esc_attr( $qr_option['limit_message'] ) : ''; ?>">
+										<div class="kwp-popup-option-item <?php echo $is_first ? 'active' : ''; ?>" data-index="<?php echo esc_attr( $index ); ?>">
 											<?php if( !empty( $qr_option['icon_image'] ) ) : ?>
-												<img src="<?php echo esc_url( $qr_option['icon_image'] ); ?>" alt="<?php echo esc_attr( $qr_option['name'] ); ?>" class="kwp-option-icon" />
+												<img src="<?php echo esc_url( $qr_option['icon_image'] ); ?>" alt="<?php echo esc_attr( $qr_option['name'] ); ?>" />
 											<?php endif; ?>
-											<span class="kwp-option-name"><?php echo esc_html( $qr_option['name'] ); ?></span>
+											<span><?php echo esc_html( $qr_option['name'] ); ?></span>
 										</div>
 									<?php endforeach; ?>
 								</div>
@@ -48,21 +73,17 @@
 						<?php endif; ?>
 						
 						<div class="kwp-qr-display">
-							<?php 
-							// Display first QR option by default
-							$first_option = reset( $qr_options );
-							if( !empty( $first_option['qr_image'] ) ) :
-							?>
+							<?php if( !empty( $first_option['qr_image'] ) ) : ?>
 								<img src="<?php echo esc_url( $first_option['qr_image'] ); ?>" class="popup-qr" />
 								<?php if ( isset( $first_option['phone_number'] ) && !empty( $first_option['phone_number'] ) ) : ?>
 									<span class="telephone-number"><a href="tel:<?php echo esc_attr( $first_option['phone_number'] ); ?>"><?php echo __( 'Add Contact:', 'payment-qr-woo' ); ?> <?php echo esc_attr( $first_option['phone_number'] ); ?></a></span>
 								<?php endif; ?>
-								<span class="price"><?php echo __( 'Amount to Pay', 'payment-qr-woo' ); ?><?php echo WC()->cart->get_cart_total(); ?></span>
+								<span class="price"><?php echo __( 'Amount to Pay', 'payment-qr-woo' ); ?></span>
 								<?php if ( isset( $first_option['limit_message'] ) && !empty( $first_option['limit_message'] ) ) : ?>
 									<p class="message-limit-amount" style="display: none;"><?php echo esc_attr( $first_option['limit_message'] ); ?></p>
 								<?php endif; ?>
-								<?php if ( isset( $options['front_description'] ) && !empty( $options['front_description'] ) ) : ?>
-									<p><?php echo esc_html( $options['front_description'] ); ?></p>
+								<?php if ( isset( $first_option['popup_description'] ) && !empty( $first_option['popup_description'] ) ) : ?>
+									<p><?php echo esc_html( $first_option['popup_description'] ); ?></p>
 								<?php endif; ?>
 							<?php endif; ?>
 						</div>
@@ -74,26 +95,30 @@
 								<input type="file" name="files" id="file" class="box__file" accept=".png, .jpg, .jpeg, .gif">
 								<label for="file"><?php echo __( 'Drag and Drop File to Upload', 'payment-qr-woo' ); ?> <br/><br/> <?php echo __( 'or', 'payment-qr-woo' ); ?></label>
 								<button type="submit" class="box__button"><?php echo __( 'Select File', 'payment-qr-woo' ); ?></button>
-							</div>
-							<input type="hidden" name="ajax" value="1">
-							<input type="hidden" name="selected_qr_option" class="selected-qr-option-input" value="<?php echo esc_attr( $first_option['name'] ); ?>">
-						</form>
+						</div>
+						<input type="hidden" name="ajax" value="1">
+						<input type="hidden" name="selected_qr_option" class="selected-qr-option-input" value="<?php echo esc_attr( $first_option['name'] ); ?>">
+					</form>
+					<div class="box__preview">
+						<div class="box__filename"></div>
+						<div class="box__image-preview"></div>
+					</div>
 						<div class="error"><?php echo __( 'Please Upload Your Receipt', 'payment-qr-woo' ); ?></div>
 						<img src="<?php echo plugins_url( '/assets/loader.gif', __FILE__ ) ?>" class="loader" />
-						<input type="submit" name="final_order" class="finalized_order btn_submit" value="<?php echo __( 'Complete Purchase', 'payment-qr-woo' ); ?>">
+						<input type="submit" name="final_order" class="finalized_order btn_submit" value="<?php echo __( 'Complete Purchase', 'payment-qr-woo' ); ?>" style="background-color: <?php echo esc_attr( $continue_btn_color ); ?>;">
 					</div>
 				</div>
 			</div>
-			<?php
-		}
+		<?php
 	}
-	add_action( 'wp_footer', 'kwp_yape_peru_payment_popup' );
+}
+add_action( 'wp_footer', 'kwp_yape_peru_payment_popup' );
 
 	if ( !function_exists( 'kwp_yape_peru_front_script' ) ) {
 		function kwp_yape_peru_front_script() {
 
-			wp_enqueue_script( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.js', __FILE__ ), array( 'jquery' ), '1.1', false );
-			wp_enqueue_style( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.css', __FILE__ ) );
+			wp_enqueue_script( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.js', __FILE__ ), array( 'jquery' ), '1.2.4', true );
+			wp_enqueue_style( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.css', __FILE__ ), array(), '1.2.4' );
 			wp_localize_script( 'kodewp_payment_qr', 'kwajaxurl', 
 				array( 
 					'ajaxurl' 	=> admin_url( 'admin-ajax.php' ),
