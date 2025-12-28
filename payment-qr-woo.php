@@ -318,9 +318,12 @@ function kwp_yape_peru_init_gateway_class() {
 					</p>
 					<p>
 						<label><?php echo __( 'Phone Number (Optional)', 'payment-qr-woo' ); ?></label>
-						<input type="text" name="woocommerce_woommerce_yape_peru_qr_options[<?php echo esc_attr( $index ); ?>][phone_number]" value="<?php echo $phone_number; ?>" placeholder="<?php echo esc_attr__( 'E.g., +51 999 999 999', 'payment-qr-woo' ); ?>" />
-							<input type="text" name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr( $index ); ?>][limit_message]" value="<?php echo $limit_message; ?>" placeholder="<?php echo esc_attr__( 'E.g., Maximum 500 per day', 'payment-qr-woo' ); ?>" />
-						</p>
+					<input type="text" name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr( $index ); ?>][phone_number]" value="<?php echo $phone_number; ?>" placeholder="<?php echo esc_attr__( 'E.g., +51 999 999 999', 'payment-qr-woo' ); ?>" />
+				</p>
+				<p>
+					<label><?php echo __( 'Limit Message (Optional)', 'payment-qr-woo' ); ?></label>
+					<input type="text" name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr( $index ); ?>][limit_message]" value="<?php echo $limit_message; ?>" placeholder="<?php echo esc_attr__( 'E.g., Maximum 500 per day', 'payment-qr-woo' ); ?>" />
+				</p>
 					</div>
 				</div>
 				<?php
@@ -444,25 +447,39 @@ function kwp_yape_peru_init_gateway_class() {
 	 */
 	public function process_payment( $order_id ) {
 
-				unset( $_SESSION['yape-peru-qrcode'] );
-			            
-			    // Mark as on-hold (we're awaiting the payment)
-			    $order->update_status( 'on-hold', __( 'Awaiting offline payment', 'payment-qr-woo' ) );
-			            
-			    // Reduce stock levels
-			    $order->reduce_order_stock();
-			            
-			    // Remove cart
-			    WC()->cart->empty_cart();
-			            
-			    // Return thankyou redirect
-			    return array(
-			        'result'    => 'success',
-			        'redirect'  => $this->get_return_url( $order )
-			    );
-	 
-		 	}
-	 
-	 	}
+		if ( !session_id() ) {
+			session_start();
+		}
+		$order = wc_get_order( $order_id );
+		
+		if( isset( $_SESSION['yape-peru-qrcode'] ) ) {
+			update_post_meta( $order_id, 'yape-peru-qrcode', esc_url_raw( $_SESSION['yape-peru-qrcode'] ) );
+			unset( $_SESSION['yape-peru-qrcode'] );
+		}
+		
+		if( isset( $_SESSION['yape-peru-qr-option-name'] ) ) {
+			update_post_meta( $order_id, 'yape-peru-qr-option-name', sanitize_text_field( $_SESSION['yape-peru-qr-option-name'] ) );
+			unset( $_SESSION['yape-peru-qr-option-name'] );
+		}
+		        
+		// Mark as on-hold (we're awaiting the payment)
+		$order->update_status( 'on-hold', __( 'Awaiting offline payment', 'payment-qr-woo' ) );
+		        
+		// Reduce stock levels
+		$order->reduce_order_stock();
+		        
+		// Remove cart
+		WC()->cart->empty_cart();
+		        
+		// Return thankyou redirect
+		return array(
+			'result'    => 'success',
+			'redirect'  => $this->get_return_url( $order )
+		);
+ 
+	}
+ 
+ 	}
+ 	
 	}
 }
