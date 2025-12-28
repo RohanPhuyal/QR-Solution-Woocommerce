@@ -1,10 +1,10 @@
 # QR Solution WooCommerce
 
-A powerful, lightweight WooCommerce extension that enables **QR Code Payments** (digital wallets, bank transfers) with proof-of-payment uploads. Perfect for markets using Yape, Plin, or direct bank transfers.
+A powerful, lightweight WooCommerce extension that enables **QR Code Payments** (digital wallets, bank transfers) with proof-of-payment uploads. Perfect for markets using **eSewa, FonePay, GPay, GKash, Yape, Plin**, or direct **Bank Transfers**.
 
 ## 🚀 Features
 
-*   **Unlimited QR Options**: Add multiple payment methods (e.g., Bank #1, Wallet #2) with custom icons and QR codes.
+*   **Unlimited QR Options**: Add multiple payment methods (e.g., **eSewa**, **FonePay**, **GPay**, **GKash**, Bank #1) with custom icons and QR codes.
 *   **Payment Receipt Upload**: Customers can upload a screenshot of their transaction directly at checkout.
 *   **COD Mode**: specialized "Cash on Delivery" toggle.
     *   **Pre-payment Logic**: Require shipping costs to be paid upfront via QR while the rest is COD.
