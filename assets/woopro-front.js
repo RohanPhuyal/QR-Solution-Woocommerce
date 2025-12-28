@@ -460,53 +460,8 @@ jQuery(function ($) {
     // Re-check on updated_checkout (AJAX refresh) - critical for catching fragment updates
     $(document.body).on('updated_checkout', function () {
         setTimeout(function () {
-            // Inline logic as requested by user
-            console.log('KWP: Updated Checkout - Running Inline Logic');
-
-            var isCodMode = (typeof kwp_translate.enable_cod_mode !== 'undefined' && kwp_translate.enable_cod_mode === 'yes');
-            var $bankContainer = $('.kwp-qr-options-container'); // Fresh selection
-
-            if (isCodMode) {
-                var paymentType = $('input[name="kwp_payment_type"]:checked').val();
-                if (!paymentType && $('input[name="kwp_payment_type"]').length) {
-                    paymentType = $('input[name="kwp_payment_type"]').first().val();
-                }
-                console.log('KWP: Inline Payment Type:', paymentType);
-
-                if (paymentType === 'cod') {
-                    var isPrePayment = (typeof kwp_translate.enable_cod_prepayment !== 'undefined' && kwp_translate.enable_cod_prepayment === 'yes');
-
-                    // Check hidden input first
-                    var shippingTotal = 0;
-                    var $shippingInput = $('#kwp_shipping_data');
-                    if ($shippingInput.length) {
-                        shippingTotal = parseFloat($shippingInput.val()) || 0;
-                    } else {
-                        shippingTotal = parseFloat(kwp_translate.shipping_total) || 0;
-                    }
-
-                    // Show only if PrePayment is ON AND Shipping > 0
-                    if (isPrePayment && shippingTotal > 0) {
-                        console.log('KWP: Inline Show', { shipping: shippingTotal, elCount: $bankContainer.length });
-
-                        if ($bankContainer.length) {
-                            $bankContainer.each(function () {
-                                this.style.setProperty('display', 'block', 'important');
-                            });
-                            // Log the first one for debug
-                            var computedDisplay = window.getComputedStyle($bankContainer.get(0)).display;
-                            console.log('KWP: Inline Computed Display', computedDisplay);
-                        }
-                    } else {
-                        console.log('KWP: Inline Hide', { shipping: shippingTotal });
-                        $bankContainer.hide();
-                    }
-                } else {
-                    $bankContainer.slideDown();
-                }
-            } else {
-                $bankContainer.show();
-            }
+            console.log('KWP: Updated Checkout - Re-running visibility check');
+            toggleBankOptionsVisibility();
         }, 500);
     });
 
@@ -588,11 +543,16 @@ jQuery(function ($) {
 
         // Determine amount to display
         if (mode === 'cod') {
-            // Show Shipping Amount
-            var shippingTotal = kwp_translate.shipping_total;
-            // Ensure float
-            shippingTotal = parseFloat(shippingTotal) || 0;
-            $('.popup-amount-label').text('Remaining Amount:'); // Or "Shipping Amount"
+            // Show Shipping Amount (Dynamic)
+            var shippingTotal = 0;
+            var $shippingInput = $('#kwp_shipping_data');
+            if ($shippingInput.length) {
+                shippingTotal = parseFloat($shippingInput.val()) || 0;
+            } else {
+                shippingTotal = parseFloat(kwp_translate.shipping_total) || 0;
+            }
+
+            $('.popup-amount-label').text('Amount to Pay:');
             $('.popup-amount-value').text(kwp_translate.currency_symbol + shippingTotal.toFixed(2));
         } else {
             // Show Full Amount

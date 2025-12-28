@@ -80,7 +80,10 @@ if (!function_exists('kwp_yape_peru_payment_popup')) {
 						<?php if (!empty($first_option['qr_image'])): ?>
 							<img src="<?php echo esc_url($first_option['qr_image']); ?>" class="popup-qr" />
 
-							<span class="price"><?php echo __('Amount to Pay', 'payment-qr-woo'); ?></span>
+							<div class="price">
+								<span class="popup-amount-label"><?php echo __('Amount to Pay', 'payment-qr-woo'); ?></span>
+								<span class="popup-amount-value"></span>
+							</div>
 							<?php if (isset($first_option['popup_description']) && !empty($first_option['popup_description'])): ?>
 								<p class="popup-description"><?php echo esc_html($first_option['popup_description']); ?></p>
 							<?php endif; ?>
@@ -134,8 +137,8 @@ if (!function_exists('kwp_yape_peru_front_script')) {
 			$grand_total = WC()->cart->get_total('edit'); // Raw value
 		}
 
-		wp_enqueue_script('kodewp_payment_qr', plugins_url('assets/woopro-front.js', __FILE__), array('jquery'), '4.0.0', true);
-		wp_enqueue_style('kodewp_payment_qr', plugins_url('assets/woopro-front.css', __FILE__), array(), '4.0.0');
+		wp_enqueue_script('kodewp_payment_qr', plugins_url('assets/woopro-front.js', __FILE__), array('jquery'), '5.1.2', true);
+		wp_enqueue_style('kodewp_payment_qr', plugins_url('assets/woopro-front.css', __FILE__), array(), '5.1.2');
 		wp_localize_script(
 			'kodewp_payment_qr',
 			'kwajaxurl',
