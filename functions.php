@@ -137,8 +137,8 @@ if (!function_exists('kwp_yape_peru_front_script')) {
 			$grand_total = WC()->cart->get_total('edit'); // Raw value
 		}
 
-		wp_enqueue_script('kodewp_payment_qr', plugins_url('assets/woopro-front.js', __FILE__), array('jquery'), '5.1.2', true);
-		wp_enqueue_style('kodewp_payment_qr', plugins_url('assets/woopro-front.css', __FILE__), array(), '5.1.2');
+		wp_enqueue_script('kodewp_payment_qr', plugins_url('assets/woopro-front.js', __FILE__), array('jquery'), '5.2.2', true);
+		wp_enqueue_style('kodewp_payment_qr', plugins_url('assets/woopro-front.css', __FILE__), array(), '5.2.2');
 		wp_localize_script(
 			'kodewp_payment_qr',
 			'kwajaxurl',

@@ -434,19 +434,85 @@ jQuery(function ($) {
             // Not in COD mode -> Always Show
             $bankContainer.show();
         }
+        updatePaymentInfoDisplay();
     }
 
-    // Toggle on payment type change
+    function updatePaymentInfoDisplay() {
+        var $infoBox = $('#kwp-payment-info-box');
+        if (!$infoBox.length) return;
+
+        var isCodMode = (typeof kwp_translate.enable_cod_mode !== 'undefined' && kwp_translate.enable_cod_mode === 'yes');
+        var currency = kwp_translate.currency_symbol;
+
+        // Get Totals (Dynamic)
+        var shippingTotal = 0;
+        var grandTotal = 0;
+
+        // Use hidden inputs updated by fragments
+        var $shippingInput = $('#kwp_shipping_data');
+        if ($shippingInput.length) {
+            shippingTotal = parseFloat($shippingInput.val()) || 0;
+        } else {
+            shippingTotal = parseFloat(kwp_translate.shipping_total) || 0;
+        }
+
+        var $grandTotalInput = $('#kwp_grand_total_data');
+        if ($grandTotalInput.length) {
+            grandTotal = parseFloat($grandTotalInput.val()) || 0;
+        } else {
+            grandTotal = parseFloat(kwp_translate.grand_total) || 0;
+        }
+
+        var html = '';
+
+        if (isCodMode) {
+            var paymentType = $('input[name="kwp_payment_type"]:checked').val();
+            // Default if undefined
+            if (!paymentType && $('input[name="kwp_payment_type"]').length) {
+                paymentType = $('input[name="kwp_payment_type"]').first().val();
+            }
+
+            if (paymentType === 'cod') {
+                var isPrePayment = (typeof kwp_translate.enable_cod_prepayment !== 'undefined' && kwp_translate.enable_cod_prepayment === 'yes');
+
+                if (isPrePayment) {
+                    // COD + PrePayment Active
+                    var codAmount = grandTotal - shippingTotal;
+                    if (codAmount < 0) codAmount = 0;
+
+                    html += 'Pay Now: ' + currency + shippingTotal.toFixed(2) + '<br>';
+                    html += 'COD Amount: ' + currency + codAmount.toFixed(2);
+                } else {
+                    // COD + PrePayment Inactive
+                    html += 'Pay Now: ' + currency + '0.00' + '<br>';
+                    html += 'COD Amount: ' + currency + grandTotal.toFixed(2);
+                }
+            } else {
+                // COD Mode Enabled BUT "Full Payment" selected
+                html += 'Total Amount to Pay (including shipping): ' + currency + grandTotal.toFixed(2);
+            }
+        } else {
+            // COD Mode Disabled (Legacy/Standard QR)
+            html += 'Total Amount to Pay (including shipping): ' + currency + grandTotal.toFixed(2);
+        }
+
+        console.log('KWP: Updating HTML to: ', html);
+        $infoBox.html(html);
+        $infoBox.show();
+    }
+
     // Toggle on payment type change
     $(document.body).on('change', 'input[name="kwp_payment_type"]', function () {
         console.log('KWP: Payment Type Change');
         toggleBankOptionsVisibility();
+        updatePaymentInfoDisplay();
     });
 
     // Initial check (on load) - delay to ensure DOM is ready
     setTimeout(function () {
         console.log('KWP: Initial Load Check (Delayed)');
         toggleBankOptionsVisibility();
+        updatePaymentInfoDisplay();
     }, 500);
 
     // Re-check on init_checkout
@@ -454,6 +520,7 @@ jQuery(function ($) {
         setTimeout(function () {
             console.log('KWP: Init Checkout Event (Delayed)');
             toggleBankOptionsVisibility();
+            updatePaymentInfoDisplay();
         }, 500);
     });
 
@@ -462,6 +529,7 @@ jQuery(function ($) {
         setTimeout(function () {
             console.log('KWP: Updated Checkout - Re-running visibility check');
             toggleBankOptionsVisibility();
+            updatePaymentInfoDisplay();
         }, 500);
     });
 

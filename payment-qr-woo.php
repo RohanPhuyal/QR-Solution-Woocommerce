@@ -533,6 +533,7 @@ function kwp_yape_peru_init_gateway_class()
 							}
 							?>
 						</div>
+						<div id="kwp-payment-info-box" style="margin-top: 15px; font-weight: bold; color: #333; line-height: 1.6;"></div>
 					</div>
 					<?php
 					return;
@@ -566,6 +567,7 @@ function kwp_yape_peru_init_gateway_class()
 						endforeach;
 						?>
 					</div>
+					<div id="kwp-payment-info-box" style="margin-top: 15px; font-weight: bold; color: #333; line-height: 1.6;"></div>
 				</div>
 				<?php
 			}
@@ -669,7 +671,7 @@ function kwp_yape_peru_init_gateway_class()
 	}
 }
 
-// Add hidden input for Shipping Total to be picked up by JS (Initial Load)
+// Add hidden input for Shipping Total AND Grand Total to be picked up by JS (Initial Load)
 add_action('woocommerce_review_order_after_order_total', 'kwp_add_shipping_data_to_checkout');
 if (!function_exists('kwp_add_shipping_data_to_checkout')) {
 	function kwp_add_shipping_data_to_checkout()
@@ -678,7 +680,9 @@ if (!function_exists('kwp_add_shipping_data_to_checkout')) {
 			return;
 		// Use raw values to avoid formatting issues
 		$shipping_total = WC()->cart->shipping_total + WC()->cart->shipping_tax_total;
+		$grand_total = WC()->cart->get_total('edit');
 		echo '<input type="hidden" id="kwp_shipping_data" value="' . esc_attr($shipping_total) . '" />';
+		echo '<input type="hidden" id="kwp_grand_total_data" value="' . esc_attr($grand_total) . '" />';
 	}
 }
 
@@ -691,7 +695,11 @@ if (!function_exists('kwp_update_shipping_data_fragment')) {
 			return $fragments;
 		// Use raw values to avoid formatting issues
 		$shipping_total = WC()->cart->shipping_total + WC()->cart->shipping_tax_total;
+		$grand_total = WC()->cart->get_total('edit');
+
 		$fragments['#kwp_shipping_data'] = '<input type="hidden" id="kwp_shipping_data" value="' . esc_attr($shipping_total) . '" />';
+		$fragments['#kwp_grand_total_data'] = '<input type="hidden" id="kwp_grand_total_data" value="' . esc_attr($grand_total) . '" />';
+
 		return $fragments;
 	}
 }
