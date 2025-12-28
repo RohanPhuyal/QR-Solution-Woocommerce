@@ -486,3 +486,11 @@
     color: #00838f;
     font-weight: 600;
 }
+
+li.payment_method_wocommerce_yape_peru > label {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #333;
+    display: block;
+    margin-bottom: 15px;
+}
