@@ -93,7 +93,7 @@ function kwp_yape_peru_init_gateway_class()
 						'title' => __('Title', 'payment-qr-woo'),
 						'type' => 'text',
 						'description' => __('This controls the title the user sees during checkout.', 'payment-qr-woo'),
-						'default' => __('QR Payment', 'payment-qr-woo'),
+						'default' => __('Select Payment Method', 'payment-qr-woo'),
 						'desc_tip' => true,
 					),
 					'qr_options_repeater' => array(
@@ -314,8 +314,7 @@ function kwp_yape_peru_init_gateway_class()
 					<div class="kwp-qr-option-fields">
 						<p>
 							<label><?php echo __('Option Name (e.g., Yape, Plin, Bank)', 'payment-qr-woo'); ?></label>
-							<input type="text"
-								name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr($index); ?>][name]"
+							<input type="text" name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr($index); ?>][name]"
 								value="<?php echo $option_name; ?>"
 								placeholder="<?php echo esc_attr__('E.g., Yape', 'payment-qr-woo'); ?>" class="kwp-option-name" />
 						</p>
@@ -453,7 +452,6 @@ function kwp_yape_peru_init_gateway_class()
 				}
 				?>
 				<div class="kwp-checkout-qr-selector">
-					<h4><?php echo __('Select Payment Method', 'payment-qr-woo'); ?></h4>
 					<div class="kwp-checkout-qr-options">
 						<?php
 						$index = 0;
