@@ -99,6 +99,31 @@ function kwp_yape_peru_init_gateway_class()
 					'qr_options_repeater' => array(
 						'type' => 'qr_options_repeater',
 					),
+					// COD Mode Settings
+					'enable_cod_mode' => array(
+						'title' => __('Enable COD Mode', 'payment-qr-woo'),
+						'type' => 'checkbox',
+						'label' => __('Enable COD vs Full Payment Toggle', 'payment-qr-woo'),
+						'default' => 'no',
+					),
+					'cod_title' => array(
+						'title' => __('COD Button Title', 'payment-qr-woo'),
+						'type' => 'text',
+						'default' => __('Cash on Delivery', 'payment-qr-woo'),
+					),
+					'cod_icon' => array(
+						'title' => __('COD Button Icon URL', 'payment-qr-woo'),
+						'type' => 'text',
+					),
+					'qr_group_title' => array(
+						'title' => __('Full Payment Button Title', 'payment-qr-woo'),
+						'type' => 'text',
+						'default' => __('Full Payment', 'payment-qr-woo'),
+					),
+					'qr_group_icon' => array(
+						'title' => __('Full Payment Button Icon URL', 'payment-qr-woo'),
+						'type' => 'text',
+					),
 					'popup_bg_color' => array(
 						'title' => __('Popup Background Color', 'payment-qr-woo'),
 						'type' => 'text',
@@ -446,6 +471,73 @@ function kwp_yape_peru_init_gateway_class()
 				$options = get_option('woocommerce_wocommerce_yape_peru_settings');
 				$qr_options = isset($options['qr_options']) ? $options['qr_options'] : array();
 
+				// COD Mode Logic
+				$enable_cod = isset($options['enable_cod_mode']) ? $options['enable_cod_mode'] : 'no';
+
+				if ($enable_cod === 'yes') {
+					$cod_title = !empty($options['cod_title']) ? $options['cod_title'] : 'Cash on Delivery';
+					$cod_icon = !empty($options['cod_icon']) ? $options['cod_icon'] : '';
+
+					$qr_title = !empty($options['qr_group_title']) ? $options['qr_group_title'] : 'Full Payment';
+					$qr_icon = !empty($options['qr_group_icon']) ? $options['qr_group_icon'] : '';
+
+					?>
+					<div class="kwp-checkout-qr-selector kwp-cod-mode">
+						<div class="kwp-checkout-qr-options">
+							<!-- COD Option -->
+							<label class="kwp-checkout-qr-option active" data-type="cod">
+								<input type="radio" name="kwp_payment_type" value="cod" checked style="display: none;" />
+								<?php if ($cod_icon): ?>
+									<img src="<?php echo esc_url($cod_icon); ?>" alt="<?php echo esc_attr($cod_title); ?>" />
+								<?php endif; ?>
+								<span class="kwp-option-name"><?php echo esc_html($cod_title); ?></span>
+							</label>
+
+							<!-- Full Payment / QR Option -->
+							<label class="kwp-checkout-qr-option" data-type="qr">
+								<input type="radio" name="kwp_payment_type" value="qr" style="display: none;" />
+								<?php if ($qr_icon): ?>
+									<img src="<?php echo esc_url($qr_icon); ?>" alt="<?php echo esc_attr($qr_title); ?>" />
+								<?php endif; ?>
+								<span class="kwp-option-name"><?php echo esc_html($qr_title); ?></span>
+							</label>
+						</div>
+
+						<!-- Container for QR Options -->
+						<div class="kwp-qr-options-container" style="margin-top: 15px;">
+							<?php
+							if (empty($qr_options)) {
+								echo '<p>' . __('No payment options configured.', 'payment-qr-woo') . '</p>';
+							} else {
+								echo '<p style="margin-bottom: 5px;"><strong>' . __('Select Bank/Wallet:', 'payment-qr-woo') . '</strong></p>';
+								echo '<div class="kwp-checkout-qr-options">';
+								$index = 0;
+								foreach ($qr_options as $qr_option):
+									$option_name = isset($qr_option['name']) ? $qr_option['name'] : '';
+									$icon_image = isset($qr_option['icon_image']) ? $qr_option['icon_image'] : '';
+									$checked = $index === 0 ? 'checked' : '';
+									$active_class = $index === 0 ? 'active' : '';
+									?>
+									<label class="kwp-checkout-qr-option kwp-sub-option <?php echo esc_attr($active_class); ?>"
+										data-index="<?php echo esc_attr($index); ?>">
+										<input type="radio" name="kwp_selected_qr_option" value="<?php echo esc_attr($index); ?>" <?php echo $checked; ?> style="display: none;" />
+										<?php if ($icon_image): ?>
+											<img src="<?php echo esc_url($icon_image); ?>" alt="<?php echo esc_attr($option_name); ?>" />
+										<?php endif; ?>
+										<span class="kwp-option-name"><?php echo esc_html($option_name); ?></span>
+									</label>
+									<?php
+									$index++;
+								endforeach;
+								echo '</div>';
+							}
+							?>
+						</div>
+					</div>
+					<?php
+					return;
+				}
+
 				if (empty($qr_options)) {
 					echo '<p>' . __('No payment options configured. Please contact the site administrator.', 'payment-qr-woo') . '</p>';
 					return;
@@ -461,7 +553,7 @@ function kwp_yape_peru_init_gateway_class()
 							$checked = $index === 0 ? 'checked' : '';
 							$active_class = $index === 0 ? 'active' : '';
 							?>
-							<label class="kwp-checkout-qr-option <?php echo esc_attr($active_class); ?>"
+							<label class="kwp-checkout-qr-option kwp-sub-option <?php echo esc_attr($active_class); ?>"
 								data-index="<?php echo esc_attr($index); ?>">
 								<input type="radio" name="kwp_selected_qr_option" value="<?php echo esc_attr($index); ?>" <?php echo $checked; ?> style="display: none;" />
 								<?php if ($icon_image): ?>
@@ -505,14 +597,51 @@ function kwp_yape_peru_init_gateway_class()
 					unset($_SESSION['yape-peru-qr-option-name']);
 				}
 
-				// COD Pre-Payment: Calculate remaining amount if enabled
-				if ($this->get_option('enable_cod_prepayment') === 'yes') {
-					$subtotal = $order->get_subtotal();  // Items only
-					$tax = $order->get_total_tax();       // VAT
-					$remaining = $subtotal + $tax;        // Remaining to pay (for Nepal Can Move API)
+				// Handle COD/QR Mode and Remaining Amount
+				if (isset($_POST['kwp_payment_type'])) {
+					$payment_type = sanitize_text_field($_POST['kwp_payment_type']);
+					update_post_meta($order_id, 'kwp_payment_type', $payment_type);
 
-					update_post_meta($order_id, '_remaining_to_pay', $remaining);
-					update_post_meta($order_id, 'custom_payment_1', 'COD');
+					// Handle COD Pre-payment Logic
+					$options = get_option('woocommerce_wocommerce_yape_peru_settings');
+					$enable_cod_prepayment = isset($options['enable_cod_prepayment']) ? $options['enable_cod_prepayment'] : 'yes';
+					$enable_cod_mode = isset($options['enable_cod_mode']) ? $options['enable_cod_mode'] : 'no';
+
+					if ($enable_cod_mode === 'yes' && $payment_type === 'cod') {
+						if ($enable_cod_prepayment === 'yes') {
+							// User paid Shipping via QR. Remaining is (Total - Shipping).
+							$total = $order->get_total();
+							$shipping = $order->get_shipping_total() + $order->get_shipping_tax();
+							$remaining = $total - $shipping;
+
+							// Ensure remaining matches logic
+							if ($remaining < 0)
+								$remaining = 0;
+
+							$order->update_meta_data('_remaining_to_pay', $remaining);
+							$order->save();
+						} else {
+							// Full COD. No pre-payment.
+							// Remaining to pay is the full amount? Or just standard COD?
+							$order->update_meta_data('_remaining_to_pay', $order->get_total());
+							$order->save();
+						}
+					} else {
+						// Full QR Payment. Remaining is 0 (Paid in full).
+						$order->update_meta_data('_remaining_to_pay', 0);
+						$order->save();
+					}
+				} elseif ($this->get_option('enable_cod_prepayment') === 'yes') {
+					// Fallback for legacy flow (if kwp_payment_type not set but pre-payment is ON globally)
+					// This handles case where maybe COD Mode is OFF but Pre-payment logic was used?
+					// But if COD Mode is OFF, how do we distinguish? 
+					// Actually, if COD Mode is OFF, we treat as standard QR (Full payment).
+					// But the legacy pre-payment logic (from previous task) was applied globally?
+					// The previous logic calculated remaining = subtotal + tax.
+					// Let's preserve legacy fallthrough just in case, or assume new logic takes over.
+					// If new JS is used, we receive kwp_payment_type (if default 'qr' is selected).
+					// If using old JS/cached, we might skip this.
+					// Let's strictly rely on kwp_payment_type if present.
 				}
 
 				// Mark as on-hold (we're awaiting the payment)

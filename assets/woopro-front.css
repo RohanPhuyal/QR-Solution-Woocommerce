@@ -494,3 +494,5 @@ li.payment_method_wocommerce_yape_peru > label {
     display: block;
     margin-bottom: 15px;
 }
+.kwp-payment-mode-options label { display: inline-flex; align-items: center; gap: 8px; }
+.kwp-payment-mode-options img { max-height: 24px; width: auto; }

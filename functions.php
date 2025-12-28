@@ -121,9 +121,20 @@ add_action('wp_footer', 'kwp_yape_peru_payment_popup');
 if (!function_exists('kwp_yape_peru_front_script')) {
 	function kwp_yape_peru_front_script()
 	{
+		$options = get_option('woocommerce_wocommerce_yape_peru_settings');
+		$enable_cod_prepayment = isset($options['enable_cod_prepayment']) ? $options['enable_cod_prepayment'] : 'yes';
+		$enable_cod_mode = isset($options['enable_cod_mode']) ? $options['enable_cod_mode'] : 'no';
 
-		wp_enqueue_script('kodewp_payment_qr', plugins_url('assets/woopro-front.js', __FILE__), array('jquery'), '2.1.5', true);
-		wp_enqueue_style('kodewp_payment_qr', plugins_url('assets/woopro-front.css', __FILE__), array(), '2.1.5');
+		// Calculate totals safely
+		$shipping_total = 0;
+		$grand_total = 0;
+		if (WC()->cart) {
+			$shipping_total = WC()->cart->get_shipping_total() + WC()->cart->get_shipping_tax();
+			$grand_total = WC()->cart->get_total('edit'); // Raw value
+		}
+
+		wp_enqueue_script('kodewp_payment_qr', plugins_url('assets/woopro-front.js', __FILE__), array('jquery'), '3.0.0', true);
+		wp_enqueue_style('kodewp_payment_qr', plugins_url('assets/woopro-front.css', __FILE__), array(), '3.0.0');
 		wp_localize_script(
 			'kodewp_payment_qr',
 			'kwajaxurl',
@@ -138,9 +149,13 @@ if (!function_exists('kwp_yape_peru_front_script')) {
 			array(
 				'kwp_pqr_btn_continue' => __('Continue', 'payment-qr-woo'),
 				'kwp_pqr_upload_images' => __('Please only upload images', 'payment-qr-woo'),
+				'enable_cod_prepayment' => $enable_cod_prepayment,
+				'enable_cod_mode' => $enable_cod_mode,
+				'shipping_total' => $shipping_total,
+				'grand_total' => $grand_total,
+				'currency_symbol' => get_woocommerce_currency_symbol(),
 			)
 		);
-
 	}
 }
 add_action('wp_enqueue_scripts', 'kwp_yape_peru_front_script');
