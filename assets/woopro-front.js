@@ -318,7 +318,7 @@ jQuery( function( $ ) {
                 if( $( '.kwp-qr-display p.popup-description' ).length ) {
                     $( '.kwp-qr-display p.popup-description' ).text( popupDescription );
                 } else {
-                    $( '.kwp-qr-display .message-limit-amount' ).after( '<p class="popup-description">' + popupDescription + '</p>' );
+                    $( '.kwp-qr-display .popup-qr' ).after( '<p class="popup-description">' + popupDescription + '</p>' );
                 }
             } else {
                 $( '.kwp-qr-display p.popup-description' ).remove();
@@ -422,7 +422,7 @@ jQuery( function( $ ) {
                 if( $( '.kwp-qr-display p.popup-description' ).length ) {
                     $( '.kwp-qr-display p.popup-description' ).text( popupDescription );
                 } else {
-                    $( '.kwp-qr-display .message-limit-amount' ).after( '<p class="popup-description">' + popupDescription + '</p>' );
+                    $( '.kwp-qr-display .popup-qr' ).after( '<p class="popup-description">' + popupDescription + '</p>' );
                 }
             } else {
                 $( '.kwp-qr-display p.popup-description' ).remove();

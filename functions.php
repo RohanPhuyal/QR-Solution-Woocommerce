@@ -40,10 +40,7 @@
 						data-index="<?php echo esc_attr( $index ); ?>"
 						data-option-name="<?php echo esc_attr( $qr_option['name'] ); ?>" 
 						data-qr-image="<?php echo esc_url( $qr_option['qr_image'] ); ?>" 
-					data-popup-description="<?php echo isset( $qr_option['popup_description'] ) ? esc_attr( $qr_option['popup_description'] ) : ''; ?>" 
-					data-phone="<?php echo isset( $qr_option['phone_number'] ) ? esc_attr( $qr_option['phone_number'] ) : ''; ?>" 
-					data-limit="<?php echo isset( $qr_option['limit_amount'] ) ? esc_attr( $qr_option['limit_amount'] ) : ''; ?>" 
-					data-limit-message="<?php echo isset( $qr_option['limit_message'] ) ? esc_attr( $qr_option['limit_message'] ) : ''; ?>">
+					data-popup-description="<?php echo isset( $qr_option['popup_description'] ) ? esc_attr( $qr_option['popup_description'] ) : ''; ?>">
 				</div>
 			<?php endforeach; ?>
 		</div>
@@ -75,19 +72,14 @@
 						<div class="kwp-qr-display">
 							<?php if( !empty( $first_option['qr_image'] ) ) : ?>
 								<img src="<?php echo esc_url( $first_option['qr_image'] ); ?>" class="popup-qr" />
-								<?php if ( isset( $first_option['phone_number'] ) && !empty( $first_option['phone_number'] ) ) : ?>
-									<span class="telephone-number"><a href="tel:<?php echo esc_attr( $first_option['phone_number'] ); ?>"><?php echo __( 'Add Contact:', 'payment-qr-woo' ); ?> <?php echo esc_attr( $first_option['phone_number'] ); ?></a></span>
-								<?php endif; ?>
+
 								<span class="price"><?php echo __( 'Amount to Pay', 'payment-qr-woo' ); ?></span>
-								<?php if ( isset( $first_option['limit_message'] ) && !empty( $first_option['limit_message'] ) ) : ?>
-									<p class="message-limit-amount" style="display: none;"><?php echo esc_attr( $first_option['limit_message'] ); ?></p>
-								<?php endif; ?>
-								<?php if ( isset( $first_option['popup_description'] ) && !empty( $first_option['popup_description'] ) ) : ?>
-									<p><?php echo esc_html( $first_option['popup_description'] ); ?></p>
+						<?php if ( isset( $first_option['popup_description'] ) && !empty( $first_option['popup_description'] ) ) : ?>
+							<p class="popup-description"><?php echo esc_html( $first_option['popup_description'] ); ?></p>
 								<?php endif; ?>
 							<?php endif; ?>
 						</div>
-						<div class="popup-price-wrapper" data-price-limit="<?php echo isset( $first_option['limit_amount'] ) ? esc_attr( $first_option['limit_amount'] ) : ''; ?>"></div>
+						<div class="popup-price-wrapper"></div>
 					</div>
 					<div class="second-step">
 						<form method="post" enctype="multipart/form-data" novalidate="" class="box has-advanced-upload">
@@ -117,8 +109,8 @@ add_action( 'wp_footer', 'kwp_yape_peru_payment_popup' );
 	if ( !function_exists( 'kwp_yape_peru_front_script' ) ) {
 		function kwp_yape_peru_front_script() {
 
-			wp_enqueue_script( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.js', __FILE__ ), array( 'jquery' ), '2.0.0', true );
-			wp_enqueue_style( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.css', __FILE__ ), array(), '2.0.0' );
+		wp_enqueue_script( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.js', __FILE__ ), array( 'jquery' ), '2.1.1', true );
+		wp_enqueue_style( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.css', __FILE__ ), array(), '2.1.1' );
 			wp_localize_script( 'kodewp_payment_qr', 'kwajaxurl', 
 				array( 
 					'ajaxurl' 	=> admin_url( 'admin-ajax.php' ),

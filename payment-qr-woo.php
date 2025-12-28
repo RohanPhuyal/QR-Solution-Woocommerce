@@ -286,9 +286,6 @@ function kwp_yape_peru_init_gateway_class() {
 				$option_name = isset( $qr_option['name'] ) ? esc_attr( $qr_option['name'] ) : '';
 				$qr_image = isset( $qr_option['qr_image'] ) ? esc_url( $qr_option['qr_image'] ) : '';
 				$icon_image = isset( $qr_option['icon_image'] ) ? esc_url( $qr_option['icon_image'] ) : '';
-				$phone_number = isset( $qr_option['phone_number'] ) ? esc_attr( $qr_option['phone_number'] ) : '';
-				$limit_amount = isset( $qr_option['limit_amount'] ) ? esc_attr( $qr_option['limit_amount'] ) : '';
-				$limit_message = isset( $qr_option['limit_message'] ) ? esc_attr( $qr_option['limit_message'] ) : '';
 			$popup_description = isset( $qr_option['popup_description'] ) ? esc_attr( $qr_option['popup_description'] ) : '';
 			?>
 			<div class="kwp-qr-option-row" data-index="<?php echo esc_attr( $index ); ?>">
@@ -331,17 +328,9 @@ function kwp_yape_peru_init_gateway_class() {
 						<label><?php echo __( 'Popup Description', 'payment-qr-woo' ); ?></label>
 						<textarea name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr( $index ); ?>][popup_description]" rows="3" style="width: 100%;" placeholder="<?php echo esc_attr__( 'Description to show in payment popup', 'payment-qr-woo' ); ?>"><?php echo $popup_description; ?></textarea>
 					</p>
-					<p>
-						<label><?php echo __( 'Phone Number (Optional)', 'payment-qr-woo' ); ?></label>
-					<input type="text" name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr( $index ); ?>][phone_number]" value="<?php echo $phone_number; ?>" placeholder="<?php echo esc_attr__( 'E.g., +51 999 999 999', 'payment-qr-woo' ); ?>" />
-				</p>
-				<p>
-					<label><?php echo __( 'Limit Message (Optional)', 'payment-qr-woo' ); ?></label>
-					<input type="text" name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr( $index ); ?>][limit_message]" value="<?php echo $limit_message; ?>" placeholder="<?php echo esc_attr__( 'E.g., Maximum 500 per day', 'payment-qr-woo' ); ?>" />
-				</p>
-					</div>
 				</div>
-				<?php
+			</div>
+			<?php
 			}
 		
 		public function validate_qr_options_repeater_field( $key, $value ) {
@@ -377,10 +366,7 @@ function kwp_yape_peru_init_gateway_class() {
 			if ( isset( $qr_option['popup_description'] ) ) {
 				$sanitized_option['popup_description'] = sanitize_textarea_field( $qr_option['popup_description'] );
 			}
-			
-				if ( isset( $qr_option['limit_message'] ) ) {
-					$sanitized_option['limit_message'] = sanitize_text_field( $qr_option['limit_message'] );
-				}
+
 
 				// Only add if at least name and QR image are present
 				if ( ! empty( $sanitized_option['name'] ) || ! empty( $sanitized_option['qr_image'] ) ) {
