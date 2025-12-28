@@ -608,6 +608,9 @@ function kwp_yape_peru_init_gateway_class()
 					$enable_cod_mode = isset($options['enable_cod_mode']) ? $options['enable_cod_mode'] : 'no';
 
 					if ($enable_cod_mode === 'yes' && $payment_type === 'cod') {
+						$cod_title = isset($options['cod_title']) && !empty($options['cod_title']) ? $options['cod_title'] : 'Cash on Delivery';
+						$order->set_payment_method_title($cod_title);
+
 						if ($enable_cod_prepayment === 'yes') {
 							// User paid Shipping via QR. Remaining is (Total - Shipping).
 							$total = $order->get_total();
@@ -619,10 +622,10 @@ function kwp_yape_peru_init_gateway_class()
 								$remaining = 0;
 
 							$order->update_meta_data('_remaining_to_pay', $remaining);
+							$order->update_meta_data('_is_partial_cod', 'yes');
 							$order->save();
 						} else {
 							// Full COD. No pre-payment.
-							// Remaining to pay is the full amount? Or just standard COD?
 							$order->update_meta_data('_remaining_to_pay', $order->get_total());
 							$order->save();
 						}
@@ -663,5 +666,32 @@ function kwp_yape_peru_init_gateway_class()
 
 		}
 
+	}
+}
+
+// Add hidden input for Shipping Total to be picked up by JS (Initial Load)
+add_action('woocommerce_review_order_after_order_total', 'kwp_add_shipping_data_to_checkout');
+if (!function_exists('kwp_add_shipping_data_to_checkout')) {
+	function kwp_add_shipping_data_to_checkout()
+	{
+		if (!WC()->cart)
+			return;
+		// Use raw values to avoid formatting issues
+		$shipping_total = WC()->cart->shipping_total + WC()->cart->shipping_tax_total;
+		echo '<input type="hidden" id="kwp_shipping_data" value="' . esc_attr($shipping_total) . '" />';
+	}
+}
+
+// Update hidden input via AJAX Fragment
+add_filter('woocommerce_update_order_review_fragments', 'kwp_update_shipping_data_fragment');
+if (!function_exists('kwp_update_shipping_data_fragment')) {
+	function kwp_update_shipping_data_fragment($fragments)
+	{
+		if (!WC()->cart)
+			return $fragments;
+		// Use raw values to avoid formatting issues
+		$shipping_total = WC()->cart->shipping_total + WC()->cart->shipping_tax_total;
+		$fragments['#kwp_shipping_data'] = '<input type="hidden" id="kwp_shipping_data" value="' . esc_attr($shipping_total) . '" />';
+		return $fragments;
 	}
 }

@@ -192,9 +192,11 @@ jQuery(function ($) {
                     data: ajaxData,
                     success: function (response) {
                         if (response == 'yes') {
-                            $('.place-order button, #place_order').removeClass('yape_peru');
+                            var $placeOrderBtn = $('.place-order button, #place_order');
+                            $placeOrderBtn.removeClass('yape_peru');
+                            $placeOrderBtn.addClass('yape_peru_processed');
                             $('.popup-wrapper').hide();
-                            $('.place-order button, #place_order').trigger('click');
+                            $placeOrderBtn.trigger('click');
                         } else {
                             $("form.box")[0].reset();
                             $('.popup-wrapper .error').show().html(kwp_translate.kwp_pqr_upload_images).delay(2000).slideUp();
@@ -301,6 +303,213 @@ jQuery(function ($) {
     });
 
     // Modified click handler for place order
+    // Helper to parse price string to float
+    function parsePrice(priceStr) {
+        if (!priceStr) return 0;
+        // Remove currency symbol and non-numeric chars except dot and comma
+        // This is a basic parser; might need refinement for specific locales
+        // Assuming WooCommerce standard formatting options
+        var clean = priceStr.replace(/[^0-9.,]/g, '');
+        // Normalize decimal separator: if comma is decimal, replace with dot
+        // Simple heuristic: if both . and , exist, the last one is decimal
+        if (clean.indexOf(',') > -1 && clean.indexOf('.') > -1) {
+            if (clean.lastIndexOf(',') > clean.lastIndexOf('.')) {
+                clean = clean.replace(/\./g, '').replace(',', '.');
+            } else {
+                clean = clean.replace(/,/g, '');
+            }
+        } else if (clean.indexOf(',') > -1) {
+            // Check if comma is decimal (2 decimals usually) or thousand
+            // If we assume standard 2 decimal places... strictly scraping DOM is risky.
+            // BETTER: Use WC params or rely on 'kwp_translate' being updated? No, it's static.
+            // Let's try to trust the clean string if it looks like a float.
+            clean = clean.replace(',', '.');
+        }
+        return parseFloat(clean) || 0;
+    }
+
+    $(document.body).on('updated_checkout', function () {
+        // Robust detection: Look for our injected hidden input from fragment
+        var $shippingInput = $('#kwp_shipping_data');
+        var newShipping = 0;
+        var foundShipping = false;
+        var $orderReview = $('#order_review');
+
+        if ($shippingInput.length) {
+            // Best Source: The direct hidden input injected by PHP fragment
+            newShipping = parseFloat($shippingInput.val()) || 0;
+            foundShipping = true;
+        } else {
+            // Fallback: DOM scraping (should ideally not happen if PHP works)
+            // Update variables from DOM using broader selectors
+            // var $orderReview = $('#order_review'); // Already declared above
+            var $shippingRow = $orderReview.find('tr.woocommerce-shipping-totals, tr.shipping');
+
+            if ($shippingRow.length) {
+                // Check for "Free" text
+                if ($shippingRow.text().toLowerCase().indexOf('free') > -1) {
+                    newShipping = 0;
+                    foundShipping = true;
+                } else {
+                    // Try to find the price element
+                    var $price = $shippingRow.find('.woocommerce-Price-amount bdi, .woocommerce-Price-amount').last();
+                    if ($price.length) {
+                        newShipping = parsePrice($price.text());
+                        foundShipping = true;
+                    } else {
+                        // If row exists but no price element, check explicit digits
+                        var text = $shippingRow.text();
+                        if (/[0-9]/.test(text)) {
+                            newShipping = parsePrice(text);
+                            foundShipping = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (foundShipping) {
+            kwp_translate.shipping_total = newShipping;
+        } else if ($('#order_review').length && $('#order_review').find('tr.order-total').length) {
+            // If table exists and has total, but no shipping row -> Shipping is 0/None.
+            // Only update if we are fairly sure (order total row exists means table isn't empty)
+            kwp_translate.shipping_total = 0;
+        }
+
+        var $totalEl = $orderReview.find('tr.order-total td .woocommerce-Price-amount bdi, tr.order-total td .woocommerce-Price-amount').last();
+        if ($totalEl.length) {
+            kwp_translate.grand_total = parsePrice($totalEl.text());
+        }
+
+        // Trigger visibility update
+        toggleBankOptionsVisibility();
+    });
+
+    // Helper to toggle bank options visibility
+    function toggleBankOptionsVisibility() {
+        var isCodMode = (typeof kwp_translate.enable_cod_mode !== 'undefined' && kwp_translate.enable_cod_mode === 'yes');
+        var $bankContainer = $('.kwp-qr-options-container');
+
+        if (isCodMode) {
+            var paymentType = $('input[name="kwp_payment_type"]:checked').val();
+            // Default to first if undefined
+            if (!paymentType && $('input[name="kwp_payment_type"]').length) {
+                paymentType = $('input[name="kwp_payment_type"]').first().val();
+            }
+            console.log('KWP: Payment Type Detected:', paymentType);
+
+            if (paymentType === 'cod') {
+                var isPrePayment = (typeof kwp_translate.enable_cod_prepayment !== 'undefined' && kwp_translate.enable_cod_prepayment === 'yes');
+                // Check hidden input first (updated by fragments), then fall back to localized
+                var shippingTotal = 0;
+                var $shippingInput = $('#kwp_shipping_data');
+                if ($shippingInput.length) {
+                    shippingTotal = parseFloat($shippingInput.val()) || 0;
+                } else {
+                    shippingTotal = parseFloat(kwp_translate.shipping_total) || 0;
+                }
+
+                // Show only if PrePayment is ON AND Shipping > 0
+                if (isPrePayment && shippingTotal > 0) {
+                    console.log('KWP: Show Bank Options', { shipping: shippingTotal, elCount: $bankContainer.length });
+
+                    if ($bankContainer.length) {
+                        $bankContainer.each(function () {
+                            this.style.setProperty('display', 'block', 'important');
+                        });
+
+                        // Log the first one for debug
+                        var computedDisplay = window.getComputedStyle($bankContainer.get(0)).display;
+                        console.log('KWP: Computed Display (First)', computedDisplay);
+                    }
+                } else {
+                    console.log('KWP: Hide Bank Options', { shipping: shippingTotal, elCount: $bankContainer.length });
+                    $bankContainer.hide();
+                }
+            } else {
+                // Full Payment / QR Mode -> Always Show
+                $bankContainer.slideDown();
+            }
+        } else {
+            // Not in COD mode -> Always Show
+            $bankContainer.show();
+        }
+    }
+
+    // Toggle on payment type change
+    // Toggle on payment type change
+    $(document.body).on('change', 'input[name="kwp_payment_type"]', function () {
+        console.log('KWP: Payment Type Change');
+        toggleBankOptionsVisibility();
+    });
+
+    // Initial check (on load) - delay to ensure DOM is ready
+    setTimeout(function () {
+        console.log('KWP: Initial Load Check (Delayed)');
+        toggleBankOptionsVisibility();
+    }, 500);
+
+    // Re-check on init_checkout
+    $(document.body).on('init_checkout', function () {
+        setTimeout(function () {
+            console.log('KWP: Init Checkout Event (Delayed)');
+            toggleBankOptionsVisibility();
+        }, 500);
+    });
+
+    // Re-check on updated_checkout (AJAX refresh) - critical for catching fragment updates
+    $(document.body).on('updated_checkout', function () {
+        setTimeout(function () {
+            // Inline logic as requested by user
+            console.log('KWP: Updated Checkout - Running Inline Logic');
+
+            var isCodMode = (typeof kwp_translate.enable_cod_mode !== 'undefined' && kwp_translate.enable_cod_mode === 'yes');
+            var $bankContainer = $('.kwp-qr-options-container'); // Fresh selection
+
+            if (isCodMode) {
+                var paymentType = $('input[name="kwp_payment_type"]:checked').val();
+                if (!paymentType && $('input[name="kwp_payment_type"]').length) {
+                    paymentType = $('input[name="kwp_payment_type"]').first().val();
+                }
+                console.log('KWP: Inline Payment Type:', paymentType);
+
+                if (paymentType === 'cod') {
+                    var isPrePayment = (typeof kwp_translate.enable_cod_prepayment !== 'undefined' && kwp_translate.enable_cod_prepayment === 'yes');
+
+                    // Check hidden input first
+                    var shippingTotal = 0;
+                    var $shippingInput = $('#kwp_shipping_data');
+                    if ($shippingInput.length) {
+                        shippingTotal = parseFloat($shippingInput.val()) || 0;
+                    } else {
+                        shippingTotal = parseFloat(kwp_translate.shipping_total) || 0;
+                    }
+
+                    // Show only if PrePayment is ON AND Shipping > 0
+                    if (isPrePayment && shippingTotal > 0) {
+                        console.log('KWP: Inline Show', { shipping: shippingTotal, elCount: $bankContainer.length });
+
+                        if ($bankContainer.length) {
+                            $bankContainer.each(function () {
+                                this.style.setProperty('display', 'block', 'important');
+                            });
+                            // Log the first one for debug
+                            var computedDisplay = window.getComputedStyle($bankContainer.get(0)).display;
+                            console.log('KWP: Inline Computed Display', computedDisplay);
+                        }
+                    } else {
+                        console.log('KWP: Inline Hide', { shipping: shippingTotal });
+                        $bankContainer.hide();
+                    }
+                } else {
+                    $bankContainer.slideDown();
+                }
+            } else {
+                $bankContainer.show();
+            }
+        }, 500);
+    });
+
     $('body').on('click', '.place-order button, #place_order', function (e) {
         var selectedMethod = $('form.checkout input[name^="payment_method"]:checked').val();
 
@@ -316,6 +525,7 @@ jQuery(function ($) {
                     var isPrePayment = (typeof kwp_translate.enable_cod_prepayment !== 'undefined' && kwp_translate.enable_cod_prepayment === 'yes');
                     var shippingTotal = parseFloat(kwp_translate.shipping_total);
 
+                    // Skip popup if Shipping is 0 or less, even if PrePayment is on
                     if (isPrePayment && shippingTotal > 0) {
                         // Show popup with shipping
                         if (!$(this).hasClass('yape_peru_processed')) {
@@ -325,9 +535,7 @@ jQuery(function ($) {
                             return false;
                         }
                     } else {
-                        // Standard submit, remove yape_peru class so standard handler doesn't intercept?
-                        // Actually the standard handler detects .yape_peru class.
-                        // We should REMOVE the class if we want direct submit.
+                        // Standard submit (COD Full or Free Shipping)
                         $(this).removeClass('yape_peru');
                         return true;
                     }
@@ -357,37 +565,69 @@ jQuery(function ($) {
     });
 
     function openPaymentPopup(mode) {
+        // Reset steps
+        $('.second-step').css('display', 'none');
+        $('.popup-wrapper .error').css('display', 'none');
+        $('.first-step').css('display', 'block');
+        $('.box__input').show(); // Ensure upload box is visible
+        $('.box__success').hide(); // Hide success msg if any
+        $('.box__uploading').hide(); // Hide uploading msg
+        $('.box__file').val(''); // Clear file
+        $('.box__image-preview').empty(); // Clear preview
+
         $('.popup-wrapper .loader').css('display', 'block');
 
+        var selectedIndex = $('input[name="kwp_selected_qr_option"]:checked').val();
+
+        // Fallback or Force Default if nothing selected
+        if (typeof selectedIndex === 'undefined' || selectedIndex === null) {
+            selectedIndex = 0;
+            // Optionally check the first radio?
+            $('input[name="kwp_selected_qr_option"][value="0"]').prop('checked', true);
+        }
+
+        // Determine amount to display
         if (mode === 'cod') {
-            var amount = kwp_translate.currency_symbol + kwp_translate.shipping_total;
-            $('.first-step .price').html('Shipping Amount: ' + amount);
-            // We might need to hide the QR options in popup if paying shipping? 
-            // Or select default?
-            // For now, let's keep default behavior (showing options) but label changed.
+            // Show Shipping Amount
+            var shippingTotal = kwp_translate.shipping_total;
+            // Ensure float
+            shippingTotal = parseFloat(shippingTotal) || 0;
+            $('.popup-amount-label').text('Remaining Amount:'); // Or "Shipping Amount"
+            $('.popup-amount-value').text(kwp_translate.currency_symbol + shippingTotal.toFixed(2));
         } else {
-            $('.first-step .price').text('Amount to Pay');
-            $('.first-step .price').append($('.order-total .woocommerce-Price-amount').first().clone());
+            // Show Full Amount
+            var grandTotal = kwp_translate.grand_total;
+            grandTotal = parseFloat(grandTotal) || 0;
+            $('.popup-amount-label').text('Total Amount:');
+            $('.popup-amount-value').text(kwp_translate.currency_symbol + grandTotal.toFixed(2));
         }
 
         // Common Logic
         // Select logic
-        var selectedIndex = $('input[name="kwp_selected_qr_option"]:checked').val();
-        if (typeof selectedIndex === 'undefined') selectedIndex = 0;
-
         $('.kwp-popup-option-item').removeClass('active');
         $('.kwp-popup-option-item[data-index="' + selectedIndex + '"]').addClass('active');
 
         var $selectedOption = $('.kwp-qr-data-item[data-index="' + selectedIndex + '"]');
         if ($selectedOption.length) {
-            // ... Update popup implementation (copying from original handler logic or reusing function if we extracted it) ...
-            // Since I can't easily call the anonymous function from original code, I have to duplicate the update logic here or rely on the click trigger.
-            // Simplest approach: trigger the click on the popup option to refresh data
-            $('.kwp-popup-option-item[data-index="' + selectedIndex + '"]').trigger('click');
+            // Trigger a click on the corresponding popup option to force update data
+            // But we must ensure the popup option exists in the DOM
+            var $popupOption = $('.kwp-popup-option-item[data-index="' + selectedIndex + '"]');
+            if ($popupOption.length) {
+                $popupOption.trigger('click');
+            } else {
+                // If popup options aren't rendered or hidden, manually update from data item
+                // (This is a failsafe)
+                var qrImage = $selectedOption.data('qr-image');
+                $('.popup-qr').attr('src', qrImage);
+                var popupDescription = $selectedOption.data('popup-description');
+                if (popupDescription && $('.kwp-qr-display p.popup-description').length) {
+                    $('.kwp-qr-display p.popup-description').text(popupDescription);
+                }
+            }
         }
 
         $('.popup-wrapper').show();
-        $('.popup-wrapper .loader').css('display', 'none'); // Hide loader after show
+        $('.popup-wrapper .loader').css('display', 'none');
     }
 
     // Original handlers (kept for legacy or internal parts)
@@ -402,12 +642,34 @@ jQuery(function ($) {
 
     // ... Keeping rest of file ...
     // Handle checkout QR option selection
-    $('body').on('click', '.kwp-sub-option', function () {
+    // Unified click handler for options to ensure selection works (Fix for unselectable issue)
+    $('body').on('click', '.kwp-checkout-qr-option', function (e) {
         var $this = $(this);
-        // Remove active class ONLY from other sub-options
-        $('.kwp-sub-option').removeClass('active');
-        $this.addClass('active');
-        $this.find('input[type="radio"]').prop('checked', true).trigger('change');
+
+        // Check if this is a Mode Toggle (COD/Full)
+        if ($this.attr('data-type')) {
+            // Mode selection
+            $('.kwp-checkout-qr-option[data-type]').removeClass('active');
+            $this.addClass('active');
+            $this.find('input[type="radio"]').prop('checked', true).trigger('change');
+        }
+        // Check if this is a Sub-option (Bank/Wallet)
+        else if ($this.hasClass('kwp-sub-option')) {
+            // Bank selection
+            $('.kwp-sub-option').removeClass('active');
+            $this.addClass('active');
+            $this.find('input[type="radio"]').prop('checked', true).trigger('change');
+        }
+        // Legacy fallback (if neither class/attr matches but it's an option)
+        else {
+            // Maybe legacy mode items? They should have kwp-sub-option now, but just in case
+            // If it has a radio, trigger it
+            if ($this.find('input[type="radio"]').length) {
+                $('.kwp-checkout-qr-option:not([data-type])').removeClass('active'); // Broad clear
+                $this.addClass('active');
+                $this.find('input[type="radio"]').prop('checked', true).trigger('change');
+            }
+        }
     });
 
     // Handle popup QR option selection

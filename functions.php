@@ -129,12 +129,13 @@ if (!function_exists('kwp_yape_peru_front_script')) {
 		$shipping_total = 0;
 		$grand_total = 0;
 		if (WC()->cart) {
-			$shipping_total = WC()->cart->get_shipping_total() + WC()->cart->get_shipping_tax();
+			// Fix: Use raw float values instead of formatted strings
+			$shipping_total = WC()->cart->shipping_total + WC()->cart->shipping_tax_total;
 			$grand_total = WC()->cart->get_total('edit'); // Raw value
 		}
 
-		wp_enqueue_script('kodewp_payment_qr', plugins_url('assets/woopro-front.js', __FILE__), array('jquery'), '3.0.0', true);
-		wp_enqueue_style('kodewp_payment_qr', plugins_url('assets/woopro-front.css', __FILE__), array(), '3.0.0');
+		wp_enqueue_script('kodewp_payment_qr', plugins_url('assets/woopro-front.js', __FILE__), array('jquery'), '4.0.0', true);
+		wp_enqueue_style('kodewp_payment_qr', plugins_url('assets/woopro-front.css', __FILE__), array(), '4.0.0');
 		wp_localize_script(
 			'kodewp_payment_qr',
 			'kwajaxurl',
