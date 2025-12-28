@@ -229,3 +229,65 @@ add_action( 'wp_footer', 'kwp_yape_peru_payment_popup' );
 			}
 		}
 	}
+/* ===== COD Pre-Payment Integration (Nepal Can Move API) ===== */
+
+// Display Remaining Amount in Admin Order Totals
+add_action( 'woocommerce_admin_order_totals_after_total', 'kwp_display_remaining_admin' );
+function kwp_display_remaining_admin( $order_id ) {
+$order = wc_get_order( $order_id );
+if ( ! $order || $order->get_payment_method() !== 'wocommerce_yape_peru' ) return;
+
+$remaining = $order->get_meta( '_remaining_to_pay' );
+if ( $remaining === '' ) return;
+
+echo '<tr><td class="label">' . __( 'Remaining to Pay:', 'payment-qr-woo' ) . '</td><td width="1%"></td><td class="total">';
+
+if ( $remaining && floatval($remaining) > 0 ) {
+echo wc_price( $remaining, array( 'currency' => $order->get_currency() ) );
+} else {
+echo '<span style="color:green;font-weight:bold;">' . __( 'Fully Paid', 'payment-qr-woo' ) . '</span>';
+}
+echo '</td></tr>';
+}
+
+// Add Remaining Column to My Account Orders
+add_filter( 'woocommerce_my_account_my_orders_columns', 'kwp_add_remaining_column_my_account' );
+function kwp_add_remaining_column_my_account( $columns ) {
+$columns['remaining_to_pay'] = __( 'Remaining to Pay', 'payment-qr-woo' );
+return $columns;
+}
+
+add_action( 'woocommerce_my_account_my_orders_column_remaining_to_pay', 'kwp_show_remaining_column_my_account' );
+function kwp_show_remaining_column_my_account( $order ) {
+if ( $order->get_payment_method() !== 'wocommerce_yape_peru' ) { echo ''; return; }
+$remaining = $order->get_meta( '_remaining_to_pay' );
+if ( $remaining === '' ) { echo ''; return; }
+if ( $remaining && floatval($remaining) > 0 ) {
+echo wc_price( $remaining, array( 'currency' => $order->get_currency() ) );
+} else {
+echo '<span style="color:green;font-weight:bold;">' . __( 'Fully Paid', 'payment-qr-woo' ) . '</span>';
+}
+}
+
+// Add Remaining to Order Emails
+add_filter( 'woocommerce_get_order_item_totals', 'kwp_add_remaining_to_emails', 10, 3 );
+function kwp_add_remaining_to_emails( $total_rows, $order, $tax_display ) {
+if ( $order->get_payment_method() !== 'wocommerce_yape_peru' ) return $total_rows;
+$remaining = $order->get_meta( '_remaining_to_pay' );
+if ( $remaining === '' ) return $total_rows;
+if ( $remaining && floatval($remaining) > 0 ) {
+$total_rows['remaining_to_pay'] = array( 'label' => __( 'Remaining to Pay', 'payment-qr-woo' ), 'value' => wc_price( $remaining, array( 'currency' => $order->get_currency() ) ) );
+} else {
+$total_rows['remaining_to_pay'] = array( 'label' => __( 'Remaining to Pay', 'payment-qr-woo' ), 'value' => '<span style="color:green;font-weight:bold;">' . __( 'Fully Paid', 'payment-qr-woo' ) . '</span>' );
+}
+return $total_rows;
+}
+
+// Mark Remaining as 0 when order is completed
+add_action( 'woocommerce_order_status_completed', 'kwp_mark_remaining_fully_paid' );
+function kwp_mark_remaining_fully_paid( $order_id ) {
+$order = wc_get_order( $order_id );
+if ( ! $order || $order->get_payment_method() !== 'wocommerce_yape_peru' ) return;
+$order->update_meta_data( '_remaining_to_pay', 0 );
+$order->save();
+}

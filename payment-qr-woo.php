@@ -117,6 +117,14 @@ function kwp_yape_peru_init_gateway_class() {
 					'default'     => '#00bcd4',
 					'class'       => 'color-picker',
 				),
+				'enable_cod_prepayment' => array(
+					'title'       => __( 'COD Pre-Payment', 'payment-qr-woo' ),
+					'label'       => __( 'Enable COD Pre-Payment (Remaining Amount)', 'payment-qr-woo' ),
+					'type'        => 'checkbox',
+					'description' => __( 'When enabled, only subtotal + VAT will be marked as remaining to pay. Used by Nepal Can Move API.', 'payment-qr-woo' ),
+					'default'     => 'no',
+					'desc_tip'    => true,
+				),
 			);
 		 	}
 
@@ -467,6 +475,16 @@ function kwp_yape_peru_init_gateway_class() {
 		if( isset( $_SESSION['yape-peru-qr-option-name'] ) ) {
 			update_post_meta( $order_id, 'yape-peru-qr-option-name', sanitize_text_field( $_SESSION['yape-peru-qr-option-name'] ) );
 			unset( $_SESSION['yape-peru-qr-option-name'] );
+		}
+		
+		// COD Pre-Payment: Calculate remaining amount if enabled
+		if ( $this->get_option( 'enable_cod_prepayment' ) === 'yes' ) {
+			$subtotal = $order->get_subtotal();  // Items only
+			$tax = $order->get_total_tax();       // VAT
+			$remaining = $subtotal + $tax;        // Remaining to pay (for Nepal Can Move API)
+			
+			update_post_meta( $order_id, '_remaining_to_pay', $remaining );
+			update_post_meta( $order_id, 'custom_payment_1', 'COD' );
 		}
 		        
 		// Mark as on-hold (we're awaiting the payment)
