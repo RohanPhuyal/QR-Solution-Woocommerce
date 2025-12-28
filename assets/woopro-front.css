@@ -437,7 +437,7 @@
 .kwp-checkout-qr-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     align-items: stretch;
 }
 
@@ -446,13 +446,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 15px;
+    padding: 12px 15px;
     border: 2px solid #ddd;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 100px;
-    flex: 0 1 auto;
+    min-width: 90px;
+    max-width: 120px;
+    flex: 0 0 auto;
     background: #fff;
 }
 
@@ -468,14 +469,14 @@
 }
 
 .kwp-checkout-qr-option img {
-    max-width: 50px;
-    max-height: 50px;
+    max-width: 40px;
+    max-height: 40px;
     margin-bottom: 8px;
     display: block;
 }
 
 .kwp-checkout-qr-option .kwp-option-name {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     text-align: center;
     color: #333;

@@ -117,8 +117,8 @@ add_action( 'wp_footer', 'kwp_yape_peru_payment_popup' );
 	if ( !function_exists( 'kwp_yape_peru_front_script' ) ) {
 		function kwp_yape_peru_front_script() {
 
-			wp_enqueue_script( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.js', __FILE__ ), array( 'jquery' ), '1.2.4', true );
-			wp_enqueue_style( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.css', __FILE__ ), array(), '1.2.4' );
+			wp_enqueue_script( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.js', __FILE__ ), array( 'jquery' ), '1.2.6', true );
+			wp_enqueue_style( 'kodewp_payment_qr', plugins_url( 'assets/woopro-front.css', __FILE__ ), array(), '1.2.6' );
 			wp_localize_script( 'kodewp_payment_qr', 'kwajaxurl', 
 				array( 
 					'ajaxurl' 	=> admin_url( 'admin-ajax.php' ),

@@ -293,6 +293,12 @@ jQuery( function( $ ) {
             selectedIndex = 0; // Default to first option
         }
         
+        console.log('Selected index from checkout:', selectedIndex);
+        
+        // Update popup selector active state to match checkout selection
+        $( '.kwp-popup-option-item' ).removeClass( 'active' );
+        $( '.kwp-popup-option-item[data-index="' + selectedIndex + '"]' ).addClass( 'active' );
+        
         // Load data from the corresponding hidden div
         var $selectedOption = $( '.kwp-qr-data-item[data-index="' + selectedIndex + '"]' );
         
