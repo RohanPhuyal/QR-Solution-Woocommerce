@@ -1,0 +1,96 @@
+.woocommerce-yape-peru-upload-wrapper {
+	padding: 34px;
+	border: 2px dotted;
+	width: 150px;
+}
+
+.woocommerce-yape-peru-upload-wrapper span {
+	font-size: 20px;
+	text-align: center;
+	width: 100%;
+	margin-bottom: 15px;
+	display: inline-block;
+}
+
+.wp-core-ui .woocommerce-yape-peru-upload-wrapper button.button-secondary {
+	display: block;
+	margin-top: 20px;
+	margin: 0 auto;
+}
+
+.toplevel_page_woocommerce_yape_perú_license .wp-menu-image img {
+	width: 20px;
+	padding-top: 12px !important;
+}
+
+.yape-preview-area .preview_area {
+	text-align: center;
+    width: 220px;
+}
+
+.yape-preview-area .preview_area .upload_qr, .yape-preview-area .preview_icon_area .upload_icon {
+	display: block;
+    padding: 10px;
+    width: 200px;
+    border: 1px solid;
+    margin-bottom: 10px;
+}
+
+/* QR Options Repeater Styles */
+.kwp-qr-options-container {
+    margin-bottom: 15px;
+}
+
+.kwp-qr-option-row {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.kwp-qr-option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.kwp-qr-option-header h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.kwp-qr-option-fields p {
+    margin: 10px 0;
+}
+
+.kwp-qr-option-fields label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.kwp-qr-option-fields input[type="text"] {
+    width: 100%;
+    max-width: 400px;
+}
+
+.kwp-option-icon-preview,
+.kwp-option-qr-preview {
+    margin-top: 10px;
+}
+
+.kwp-option-icon-preview img,
+.kwp-option-qr-preview img {
+    border: 1px solid #ddd;
+    padding: 5px;
+    background: white;
+}
+
+.kwp-add-qr-option {
+    margin-top: 10px;
+}
