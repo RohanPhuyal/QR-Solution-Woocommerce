@@ -83,6 +83,13 @@ function kwp_yape_peru_init_gateway_class() {
 						'description' => '',
 						'default'     => 'no'
 					),
+					'title' => array(
+						'title'       => __( 'Title', 'payment-qr-woo' ),
+						'type'        => 'text',
+						'description' => __( 'This controls the title the user sees during checkout.', 'payment-qr-woo' ),
+						'default'     => __( 'QR Payment', 'payment-qr-woo' ),
+						'desc_tip'    => true,
+					),
 				'qr_options_repeater' => array(
 					'type' => 'qr_options_repeater',
 				),
