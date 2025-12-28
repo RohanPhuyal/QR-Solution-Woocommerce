@@ -1,15 +1,15 @@
 <?php
 /*
- * Plugin Name: Payment QR WooCommerce
- * Description: Add-on for WooCommerce, a payment method to make payments using QR code.
+ * Plugin Name: QR Solution Woocommerce
+ * Description: QR Payment Solution for WooCommerce. Modified from Miguel Fuentes' work.
  * Requires at least: 5.2
- * Tested up to: 6.4.2
+ * Tested up to: 6.9
  * Requires PHP: 7.0
- * Version: 1.1.6
- * Author: Miguel Fuentes
- * Plugin URI: https://wordpress.org/plugins/payment-qr-woo/
- * Author URI: https://kodewp.com/
- * Text Domain: payment-qr-woo
+ * Version: 1.0.0
+ * Author: Rohan Phuyal
+ * Plugin URI: #
+ * Author URI: https://rohanphuyal.com.np/
+ * Text Domain: qr-payment-solution
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -19,7 +19,7 @@
 
 function kwp_yape_peru_load_textdomain()
 {
-	load_plugin_textdomain('payment-qr-woo', false, basename(dirname(__FILE__)) . '/languages');
+	load_plugin_textdomain('qr-payment-solution', false, basename(dirname(__FILE__)) . '/languages');
 }
 add_action('plugins_loaded', 'kwp_yape_peru_load_textdomain');
 
@@ -53,8 +53,8 @@ function kwp_yape_peru_init_gateway_class()
 				$this->id = 'wocommerce_yape_peru'; // payment gateway plugin ID
 				$this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
 				$this->has_fields = true; // in case you need a custom credit card form
-				$this->method_title = __('Payment QR WooCommerce', 'payment-qr-woo');
-				$this->method_description = __('QR Payment Method.', 'payment-qr-woo'); // will be displayed on the options page
+				$this->method_title = __('Payment QR WooCommerce', 'qr-payment-solution');
+				$this->method_description = __('QR Payment Method.', 'qr-payment-solution'); // will be displayed on the options page
 
 				// gateways can support subscriptions, refunds, saved payment methods,
 				// but in this tutorial we begin with simple payments
@@ -83,17 +83,17 @@ function kwp_yape_peru_init_gateway_class()
 
 				$this->form_fields = array(
 					'enabled' => array(
-						'title' => __('Enable/Disable', 'payment-qr-woo'),
-						'label' => __('Enable Payment QR WooCommerce', 'payment-qr-woo'),
+						'title' => __('Enable/Disable', 'qr-payment-solution'),
+						'label' => __('Enable Payment QR WooCommerce', 'qr-payment-solution'),
 						'type' => 'checkbox',
 						'description' => '',
 						'default' => 'no'
 					),
 					'title' => array(
-						'title' => __('Title', 'payment-qr-woo'),
+						'title' => __('Title', 'qr-payment-solution'),
 						'type' => 'text',
-						'description' => __('This controls the title the user sees during checkout.', 'payment-qr-woo'),
-						'default' => __('Select Payment Method', 'payment-qr-woo'),
+						'description' => __('This controls the title the user sees during checkout.', 'qr-payment-solution'),
+						'default' => __('Select Payment Method', 'qr-payment-solution'),
 						'desc_tip' => true,
 					),
 					'qr_options_repeater' => array(
@@ -101,58 +101,58 @@ function kwp_yape_peru_init_gateway_class()
 					),
 					// COD Mode Settings
 					'enable_cod_mode' => array(
-						'title' => __('Enable COD Mode', 'payment-qr-woo'),
+						'title' => __('Enable COD Mode', 'qr-payment-solution'),
 						'type' => 'checkbox',
-						'label' => __('Enable COD vs Full Payment Toggle', 'payment-qr-woo'),
+						'label' => __('Enable COD vs Full Payment Toggle', 'qr-payment-solution'),
 						'default' => 'no',
 					),
 					'cod_title' => array(
-						'title' => __('COD Button Title', 'payment-qr-woo'),
+						'title' => __('COD Button Title', 'qr-payment-solution'),
 						'type' => 'text',
-						'default' => __('Cash on Delivery', 'payment-qr-woo'),
+						'default' => __('Cash on Delivery', 'qr-payment-solution'),
 					),
 					'cod_icon' => array(
-						'title' => __('COD Button Icon URL', 'payment-qr-woo'),
+						'title' => __('COD Button Icon URL', 'qr-payment-solution'),
 						'type' => 'text',
 					),
 					'qr_group_title' => array(
-						'title' => __('Full Payment Button Title', 'payment-qr-woo'),
+						'title' => __('Full Payment Button Title', 'qr-payment-solution'),
 						'type' => 'text',
-						'default' => __('Full Payment', 'payment-qr-woo'),
+						'default' => __('Full Payment', 'qr-payment-solution'),
 					),
 					'qr_group_icon' => array(
-						'title' => __('Full Payment Button Icon URL', 'payment-qr-woo'),
+						'title' => __('Full Payment Button Icon URL', 'qr-payment-solution'),
 						'type' => 'text',
 					),
 					'popup_bg_color' => array(
-						'title' => __('Popup Background Color', 'payment-qr-woo'),
+						'title' => __('Popup Background Color', 'qr-payment-solution'),
 						'type' => 'text',
 						'default' => '#ffffff',
 						'class' => 'color-picker',
 					),
 					'popup_text_color' => array(
-						'title' => __('Popup Text Color', 'payment-qr-woo'),
+						'title' => __('Popup Text Color', 'qr-payment-solution'),
 						'type' => 'text',
 						'default' => '#000000',
 						'class' => 'color-picker',
 					),
 					'popup_close_btn_color' => array(
-						'title' => __('Close Button Color', 'payment-qr-woo'),
+						'title' => __('Close Button Color', 'qr-payment-solution'),
 						'type' => 'text',
 						'default' => '#000000',
 						'class' => 'color-picker',
 					),
 					'popup_continue_btn_color' => array(
-						'title' => __('Continue Button Color', 'payment-qr-woo'),
+						'title' => __('Continue Button Color', 'qr-payment-solution'),
 						'type' => 'text',
 						'default' => '#00bcd4',
 						'class' => 'color-picker',
 					),
 					'enable_cod_prepayment' => array(
-						'title' => __('COD Pre-Payment', 'payment-qr-woo'),
-						'label' => __('Enable COD Pre-Payment (Remaining Amount)', 'payment-qr-woo'),
+						'title' => __('COD Pre-Payment', 'qr-payment-solution'),
+						'label' => __('Enable COD Pre-Payment (Remaining Amount)', 'qr-payment-solution'),
 						'type' => 'checkbox',
-						'description' => __('When enabled, only subtotal + VAT will be marked as remaining to pay. Used by Nepal Can Move API.', 'payment-qr-woo'),
+						'description' => __('When enabled, only subtotal + VAT will be marked as remaining to pay. Used by Nepal Can Move API.', 'qr-payment-solution'),
 						'default' => 'no',
 						'desc_tip' => true,
 					),
@@ -184,7 +184,7 @@ function kwp_yape_peru_init_gateway_class()
 						<fieldset>
 							<legend class="screen-reader-text"><span><?php echo wp_kses_post($data['title']); ?></span></legend>
 							<div class="upload_area woocommerce-yape-peru-upload-wrapper">
-								<span><?php echo __('Upload application logo', 'payment-qr-woo'); ?></span>
+								<span><?php echo __('Upload application logo', 'qr-payment-solution'); ?></span>
 								<button class="<?php echo esc_attr($data['class']); ?>" type="button"
 									name="<?php echo esc_attr($field); ?>" id="<?php echo esc_attr($field); ?>"
 									style="<?php echo esc_attr($data['css']); ?>" <?php echo $this->get_custom_attribute_html($data); ?>><?php echo wp_kses_post($data['title']); ?></button>
@@ -194,11 +194,11 @@ function kwp_yape_peru_init_gateway_class()
 				</tr>
 				<tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr($field); ?>"><?php echo __('Preview', 'payment-qr-woo'); ?></label>
+						<label for="<?php echo esc_attr($field); ?>"><?php echo __('Preview', 'qr-payment-solution'); ?></label>
 					</th>
 					<td class="forminp yape-preview-area">
 						<fieldset>
-							<legend class="screen-reader-text"><span><?php echo __('Preview', 'payment-qr-woo'); ?></span></legend>
+							<legend class="screen-reader-text"><span><?php echo __('Preview', 'qr-payment-solution'); ?></span></legend>
 							<div class="preview_icon_area">
 								<?php
 								$options = get_option('woocommerce_wocommerce_yape_peru_settings');
@@ -206,7 +206,7 @@ function kwp_yape_peru_init_gateway_class()
 									?>
 									<img src="<?php echo esc_url($options['preview_icon']); ?>" class="upload_icon">
 									<button class="remove_icon button-secondary"
-										type="button"><?php echo __('Remove', 'payment-qr-woo'); ?></button>
+										type="button"><?php echo __('Remove', 'qr-payment-solution'); ?></button>
 									<?php echo esc_html($this->get_description_html($data)); ?>
 								<?php } ?>
 							</div>
@@ -242,7 +242,7 @@ function kwp_yape_peru_init_gateway_class()
 						<fieldset>
 							<legend class="screen-reader-text"><span><?php echo wp_kses_post($data['title']); ?></span></legend>
 							<div class="upload_area woocommerce-yape-peru-upload-wrapper">
-								<span><?php echo __('Upload the QR here', 'payment-qr-woo'); ?></span>
+								<span><?php echo __('Upload the QR here', 'qr-payment-solution'); ?></span>
 								<button class="<?php echo esc_attr($data['class']); ?>" type="button"
 									name="<?php echo esc_attr($field); ?>" id="<?php echo esc_attr($field); ?>"
 									style="<?php echo esc_attr($data['css']); ?>" <?php echo $this->get_custom_attribute_html($data); ?>><?php echo wp_kses_post($data['title']); ?></button>
@@ -252,11 +252,11 @@ function kwp_yape_peru_init_gateway_class()
 				</tr>
 				<tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr($field); ?>"><?php echo __('Preview', 'payment-qr-woo'); ?></label>
+						<label for="<?php echo esc_attr($field); ?>"><?php echo __('Preview', 'qr-payment-solution'); ?></label>
 					</th>
 					<td class="forminp yape-preview-area">
 						<fieldset>
-							<legend class="screen-reader-text"><span><?php echo __('Preview', 'payment-qr-woo'); ?></span></legend>
+							<legend class="screen-reader-text"><span><?php echo __('Preview', 'qr-payment-solution'); ?></span></legend>
 							<div class="preview_area">
 								<?php
 								$options = get_option('woocommerce_wocommerce_yape_peru_settings');
@@ -264,7 +264,7 @@ function kwp_yape_peru_init_gateway_class()
 									?>
 									<img src="<?php echo $options['preview_qr'] ?>" class="upload_qr">
 									<button class="remove_qr button-secondary"
-										type="button"><?php echo __('Remove', 'payment-qr-woo'); ?></button>
+										type="button"><?php echo __('Remove', 'qr-payment-solution'); ?></button>
 									<?php echo $this->get_description_html($data); ?>
 								<?php } ?>
 							</div>
@@ -314,7 +314,7 @@ function kwp_yape_peru_init_gateway_class()
 								?>
 							</div>
 							<button type="button"
-								class="button button-secondary kwp-add-qr-option"><?php echo __('Add QR Option', 'payment-qr-woo'); ?></button>
+								class="button button-secondary kwp-add-qr-option"><?php echo __('Add QR Option', 'qr-payment-solution'); ?></button>
 							<?php echo $this->get_description_html($data); ?>
 						</fieldset>
 					</td>
@@ -332,57 +332,57 @@ function kwp_yape_peru_init_gateway_class()
 				?>
 				<div class="kwp-qr-option-row" data-index="<?php echo esc_attr($index); ?>">
 					<div class="kwp-qr-option-header">
-						<h4><?php echo sprintf(__('Payment Option #%d', 'payment-qr-woo'), $index + 1); ?></h4>
+						<h4><?php echo sprintf(__('Payment Option #%d', 'qr-payment-solution'), $index + 1); ?></h4>
 						<button type="button"
-							class="button button-link-delete kwp-remove-qr-option"><?php echo __('Remove', 'payment-qr-woo'); ?></button>
+							class="button button-link-delete kwp-remove-qr-option"><?php echo __('Remove', 'qr-payment-solution'); ?></button>
 					</div>
 					<div class="kwp-qr-option-fields">
 						<p>
-							<label><?php echo __('Option Name (e.g., Yape, Plin, Bank)', 'payment-qr-woo'); ?></label>
+							<label><?php echo __('Option Name (e.g., Yape, Plin, Bank)', 'qr-payment-solution'); ?></label>
 							<input type="text" name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr($index); ?>][name]"
 								value="<?php echo $option_name; ?>"
-								placeholder="<?php echo esc_attr__('E.g., Yape', 'payment-qr-woo'); ?>" class="kwp-option-name" />
+								placeholder="<?php echo esc_attr__('E.g., Yape', 'qr-payment-solution'); ?>" class="kwp-option-name" />
 						</p>
 						<p>
-							<label><?php echo __('Icon Image', 'payment-qr-woo'); ?></label>
+							<label><?php echo __('Icon Image', 'qr-payment-solution'); ?></label>
 							<input type="hidden"
 								name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr($index); ?>][icon_image]"
 								value="<?php echo $icon_image; ?>" class="kwp-option-icon-url" />
 							<button type="button"
-								class="button button-secondary kwp-upload-option-icon"><?php echo __('Select Icon', 'payment-qr-woo'); ?></button>
+								class="button button-secondary kwp-upload-option-icon"><?php echo __('Select Icon', 'qr-payment-solution'); ?></button>
 							<?php if ($icon_image): ?>
 							<div class="kwp-option-icon-preview">
 								<img src="<?php echo $icon_image; ?>" style="max-width: 80px; display: block; margin-top: 5px;" />
 								<button type="button"
-									class="button button-link-delete kwp-remove-option-icon"><?php echo __('Remove Icon', 'payment-qr-woo'); ?></button>
+									class="button button-link-delete kwp-remove-option-icon"><?php echo __('Remove Icon', 'qr-payment-solution'); ?></button>
 							</div>
 						<?php else: ?>
 							<div class="kwp-option-icon-preview" style="display: none;"></div>
 						<?php endif; ?>
 						</p>
 						<p>
-							<label><?php echo __('QR Code Image', 'payment-qr-woo'); ?></label>
+							<label><?php echo __('QR Code Image', 'qr-payment-solution'); ?></label>
 							<input type="hidden"
 								name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr($index); ?>][qr_image]"
 								value="<?php echo $qr_image; ?>" class="kwp-option-qr-url" />
 							<button type="button"
-								class="button button-secondary kwp-upload-option-qr"><?php echo __('Select QR Code', 'payment-qr-woo'); ?></button>
+								class="button button-secondary kwp-upload-option-qr"><?php echo __('Select QR Code', 'qr-payment-solution'); ?></button>
 							<?php if ($qr_image): ?>
 							<div class="kwp-option-qr-preview">
 								<img src="<?php echo $qr_image; ?>" style="max-width: 150px; display: block; margin-top: 5px;" />
 								<button type="button"
-									class="button button-link-delete kwp-remove-option-qr"><?php echo __('Remove QR', 'payment-qr-woo'); ?></button>
+									class="button button-link-delete kwp-remove-option-qr"><?php echo __('Remove QR', 'qr-payment-solution'); ?></button>
 							</div>
 						<?php else: ?>
 							<div class="kwp-option-qr-preview" style="display: none;"></div>
 						<?php endif; ?>
 						</p>
 						<p>
-							<label><?php echo __('Popup Description', 'payment-qr-woo'); ?></label>
+							<label><?php echo __('Popup Description', 'qr-payment-solution'); ?></label>
 							<textarea
 								name="woocommerce_wocommerce_yape_peru_qr_options[<?php echo esc_attr($index); ?>][popup_description]"
 								rows="3" style="width: 100%;"
-								placeholder="<?php echo esc_attr__('Description to show in payment popup', 'payment-qr-woo'); ?>"><?php echo $popup_description; ?></textarea>
+								placeholder="<?php echo esc_attr__('Description to show in payment popup', 'qr-payment-solution'); ?>"><?php echo $popup_description; ?></textarea>
 						</p>
 					</div>
 				</div>
@@ -507,9 +507,9 @@ function kwp_yape_peru_init_gateway_class()
 						<div class="kwp-qr-options-container" style="margin-top: 15px;">
 							<?php
 							if (empty($qr_options)) {
-								echo '<p>' . __('No payment options configured.', 'payment-qr-woo') . '</p>';
+								echo '<p>' . __('No payment options configured.', 'qr-payment-solution') . '</p>';
 							} else {
-								echo '<p style="margin-bottom: 5px;"><strong>' . __('Select Bank/Wallet:', 'payment-qr-woo') . '</strong></p>';
+								echo '<p style="margin-bottom: 5px;"><strong>' . __('Select Bank/Wallet:', 'qr-payment-solution') . '</strong></p>';
 								echo '<div class="kwp-checkout-qr-options">';
 								$index = 0;
 								foreach ($qr_options as $qr_option):
@@ -540,7 +540,7 @@ function kwp_yape_peru_init_gateway_class()
 				}
 
 				if (empty($qr_options)) {
-					echo '<p>' . __('No payment options configured. Please contact the site administrator.', 'payment-qr-woo') . '</p>';
+					echo '<p>' . __('No payment options configured. Please contact the site administrator.', 'qr-payment-solution') . '</p>';
 					return;
 				}
 				?>
@@ -650,7 +650,7 @@ function kwp_yape_peru_init_gateway_class()
 				}
 
 				// Mark as on-hold (we're awaiting the payment)
-				$order->update_status('on-hold', __('Awaiting offline payment', 'payment-qr-woo'));
+				$order->update_status('on-hold', __('Awaiting offline payment', 'qr-payment-solution'));
 
 				// Reduce stock levels
 				$order->reduce_order_stock();

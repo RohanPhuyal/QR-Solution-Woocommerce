@@ -55,7 +55,7 @@ if (!function_exists('kwp_yape_peru_payment_popup')) {
 					<?php if (count($qr_options) > 1): ?>
 						<div class="kwp-popup-qr-selector">
 							<h3 style="font-size: 18px; margin-bottom: 15px;">
-								<?php echo __('Select Payment Method', 'payment-qr-woo'); ?>
+								<?php echo __('Select Payment Method', 'qr-payment-solution'); ?>
 							</h3>
 							<div class="kwp-popup-qr-options">
 								<?php foreach ($qr_options as $index => $qr_option):
@@ -81,7 +81,7 @@ if (!function_exists('kwp_yape_peru_payment_popup')) {
 							<img src="<?php echo esc_url($first_option['qr_image']); ?>" class="popup-qr" />
 
 							<div class="price">
-								<span class="popup-amount-label"><?php echo __('Amount to Pay', 'payment-qr-woo'); ?></span>
+								<span class="popup-amount-label"><?php echo __('Amount to Pay', 'qr-payment-solution'); ?></span>
 								<span class="popup-amount-value"></span>
 							</div>
 							<?php if (isset($first_option['popup_description']) && !empty($first_option['popup_description'])): ?>
@@ -95,10 +95,10 @@ if (!function_exists('kwp_yape_peru_payment_popup')) {
 					<form method="post" enctype="multipart/form-data" novalidate="" class="box has-advanced-upload">
 						<div class="box__input">
 							<input type="file" name="files" id="file" class="box__file" accept=".png, .jpg, .jpeg, .gif">
-							<label for="file"><?php echo __('Drag and Drop File to Upload', 'payment-qr-woo'); ?> <br /><br />
-								<?php echo __('or', 'payment-qr-woo'); ?></label>
+							<label for="file"><?php echo __('Drag and Drop File to Upload', 'qr-payment-solution'); ?> <br /><br />
+								<?php echo __('or', 'qr-payment-solution'); ?></label>
 							<button type="submit"
-								class="box__button"><?php echo __('Select File', 'payment-qr-woo'); ?></button>
+								class="box__button"><?php echo __('Select File', 'qr-payment-solution'); ?></button>
 						</div>
 						<input type="hidden" name="ajax" value="1">
 						<input type="hidden" name="selected_qr_option" class="selected-qr-option-input"
@@ -108,10 +108,10 @@ if (!function_exists('kwp_yape_peru_payment_popup')) {
 						<div class="box__filename"></div>
 						<div class="box__image-preview"></div>
 					</div>
-					<div class="error"><?php echo __('Please Upload Your Receipt', 'payment-qr-woo'); ?></div>
+					<div class="error"><?php echo __('Please Upload Your Receipt', 'qr-payment-solution'); ?></div>
 					<img src="<?php echo plugins_url('/assets/loader.gif', __FILE__) ?>" class="loader" />
 					<input type="submit" name="final_order" class="finalized_order btn_submit"
-						value="<?php echo __('Complete Purchase', 'payment-qr-woo'); ?>"
+						value="<?php echo __('Complete Purchase', 'qr-payment-solution'); ?>"
 						style="background-color: <?php echo esc_attr($continue_btn_color); ?>;">
 				</div>
 			</div>
@@ -151,8 +151,8 @@ if (!function_exists('kwp_yape_peru_front_script')) {
 			'kodewp_payment_qr',
 			'kwp_translate',
 			array(
-				'kwp_pqr_btn_continue' => __('Continue', 'payment-qr-woo'),
-				'kwp_pqr_upload_images' => __('Please only upload images', 'payment-qr-woo'),
+				'kwp_pqr_btn_continue' => __('Continue', 'qr-payment-solution'),
+				'kwp_pqr_upload_images' => __('Please only upload images', 'qr-payment-solution'),
 				'enable_cod_prepayment' => $enable_cod_prepayment,
 				'enable_cod_mode' => $enable_cod_mode,
 				'shipping_total' => $shipping_total,
@@ -233,9 +233,9 @@ if (!function_exists('kwp_yape_peru_meta_box')) {
 	function kwp_yape_peru_meta_box()
 	{
 		if (version_compare(WC_VERSION, '7.0.0', '>=')) {
-			add_meta_box('kwp-yape-peru-meta-box', __('QR Code Payment Receipt', 'payment-qr-woo'), 'kwp_yape_peru_meta_box_callback', 'woocommerce_page_wc-orders', 'normal');
+			add_meta_box('kwp-yape-peru-meta-box', __('QR Code Payment Receipt', 'qr-payment-solution'), 'kwp_yape_peru_meta_box_callback', 'woocommerce_page_wc-orders', 'normal');
 		} else {
-			add_meta_box('kwp-yape-peru-meta-box', __('QR Code Payment Receipt', 'payment-qr-woo'), 'kwp_yape_peru_meta_box_callback', 'shop_order', 'normal');
+			add_meta_box('kwp-yape-peru-meta-box', __('QR Code Payment Receipt', 'qr-payment-solution'), 'kwp_yape_peru_meta_box_callback', 'shop_order', 'normal');
 		}
 	}
 }
@@ -250,11 +250,11 @@ if (!function_exists('kwp_yape_peru_meta_box_callback')) {
 		$qr_option_name = get_post_meta($post->ID, 'yape-peru-qr-option-name', true);
 
 		if (!empty($qr_option_name)) {
-			echo '<p><strong>' . __('Payment Method Used:', 'payment-qr-woo') . '</strong> ' . esc_html($qr_option_name) . '</p>';
+			echo '<p><strong>' . __('Payment Method Used:', 'qr-payment-solution') . '</strong> ' . esc_html($qr_option_name) . '</p>';
 		}
 
 		if (!empty($yape_peru_qrcode) && esc_url($yape_peru_qrcode)) {
-			echo '<p><strong>' . __('Payment Receipt:', 'payment-qr-woo') . '</strong></p>';
+			echo '<p><strong>' . __('Payment Receipt:', 'qr-payment-solution') . '</strong></p>';
 			echo '<a href="' . esc_url($yape_peru_qrcode) . '" target="_blank">';
 			echo '<img src="' . esc_url($yape_peru_qrcode) . '" alt="" width="200" height="200" />';
 			echo '</a>';
@@ -275,12 +275,12 @@ function kwp_display_remaining_admin($order_id)
 	if ($remaining === '')
 		return;
 
-	echo '<tr><td class="label">' . __('Remaining to Pay:', 'payment-qr-woo') . '</td><td width="1%"></td><td class="total">';
+	echo '<tr><td class="label">' . __('Remaining to Pay:', 'qr-payment-solution') . '</td><td width="1%"></td><td class="total">';
 
 	if ($remaining && floatval($remaining) > 0) {
 		echo wc_price($remaining, array('currency' => $order->get_currency()));
 	} else {
-		echo '<span style="color:green;font-weight:bold;">' . __('Fully Paid', 'payment-qr-woo') . '</span>';
+		echo '<span style="color:green;font-weight:bold;">' . __('Fully Paid', 'qr-payment-solution') . '</span>';
 	}
 	echo '</td></tr>';
 }
@@ -289,7 +289,7 @@ function kwp_display_remaining_admin($order_id)
 add_filter('woocommerce_my_account_my_orders_columns', 'kwp_add_remaining_column_my_account');
 function kwp_add_remaining_column_my_account($columns)
 {
-	$columns['remaining_to_pay'] = __('Remaining to Pay', 'payment-qr-woo');
+	$columns['remaining_to_pay'] = __('Remaining to Pay', 'qr-payment-solution');
 	return $columns;
 }
 
@@ -308,7 +308,7 @@ function kwp_show_remaining_column_my_account($order)
 	if ($remaining && floatval($remaining) > 0) {
 		echo wc_price($remaining, array('currency' => $order->get_currency()));
 	} else {
-		echo '<span style="color:green;font-weight:bold;">' . __('Fully Paid', 'payment-qr-woo') . '</span>';
+		echo '<span style="color:green;font-weight:bold;">' . __('Fully Paid', 'qr-payment-solution') . '</span>';
 	}
 }
 
@@ -322,9 +322,9 @@ function kwp_add_remaining_to_emails($total_rows, $order, $tax_display)
 	if ($remaining === '')
 		return $total_rows;
 	if ($remaining && floatval($remaining) > 0) {
-		$total_rows['remaining_to_pay'] = array('label' => __('Remaining to Pay', 'payment-qr-woo'), 'value' => wc_price($remaining, array('currency' => $order->get_currency())));
+		$total_rows['remaining_to_pay'] = array('label' => __('Remaining to Pay', 'qr-payment-solution'), 'value' => wc_price($remaining, array('currency' => $order->get_currency())));
 	} else {
-		$total_rows['remaining_to_pay'] = array('label' => __('Remaining to Pay', 'payment-qr-woo'), 'value' => '<span style="color:green;font-weight:bold;">' . __('Fully Paid', 'payment-qr-woo') . '</span>');
+		$total_rows['remaining_to_pay'] = array('label' => __('Remaining to Pay', 'qr-payment-solution'), 'value' => '<span style="color:green;font-weight:bold;">' . __('Fully Paid', 'qr-payment-solution') . '</span>');
 	}
 	return $total_rows;
 }
